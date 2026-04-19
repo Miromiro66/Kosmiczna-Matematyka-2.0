@@ -483,7 +483,8 @@
                 expSeq: "Jaka kosmiczna reguła tutaj działa?", ruleDouble: "Podwój",
                 rank1: "Kosmiczny Kadet", rank2: "Odkrywca Planet", rank3: "Kapitan Galaktyki",
                 rank4: "Mistrz Grawitacji", rank5: "Strażnik Wszechświata",
-                diffEasy: "Łatwy", diffMed: "Średni", diffHard: "Trudny"
+                diffEasy: "Łatwy", diffMed: "Średni", diffHard: "Trudny",
+                showHint: "Pokaż podpowiedź"
             },
             is: {
                 appTitle: "Geimstærðfræði", goal: "Markmið", coins: "mynt",
@@ -510,7 +511,8 @@
                 expSeq: "Hvaða geimregla á við hér?", ruleDouble: "Tvöfalda",
                 rank1: "Geimkadett", rank2: "Reikistjörnukönnuður", rank3: "Vetrarbrautarkapteinn",
                 rank4: "Þyngdaraflsmeistari", rank5: "Vörður Alheimsins",
-                diffEasy: "Auðvelt", diffMed: "Miðlungs", diffHard: "Erfitt"
+                diffEasy: "Auðvelt", diffMed: "Miðlungs", diffHard: "Erfitt",
+                showHint: "Sýna vísbendingu"
             },
             en: {
                 appTitle: "Space Math", goal: "Goal", coins: "coins",
@@ -537,7 +539,8 @@
                 expSeq: "What space rule applies here?", ruleDouble: "Double",
                 rank1: "Space Cadet", rank2: "Planet Explorer", rank3: "Galaxy Captain",
                 rank4: "Gravity Master", rank5: "Guardian of the Universe",
-                diffEasy: "Easy", diffMed: "Medium", diffHard: "Hard"
+                diffEasy: "Easy", diffMed: "Medium", diffHard: "Hard",
+                showHint: "Show hint"
             }
         };
 
@@ -551,6 +554,7 @@
         let currentQuestion = null;
         let userAnswer = '';
         let feedback = null;
+        let isHintVisible = false;
         let sessionCoins = 0;
         let combo = 0;
         let earnedJustNow = 0;
@@ -716,7 +720,27 @@
             if(diff === 3) { min = 300; max = 999; }
             const a = Math.floor(Math.random() * (max - min)) + min;
             const b = Math.floor(Math.random() * (max - min)) + min;
-            return { type: 'column', a, b, operator: '+', answer: a + b, explanation: t.expAdd };
+            
+            // Obliczanie "małych jedynek" (przeniesień)
+            let strA = a.toString();
+            let strB = b.toString();
+            let ansStr = (a + b).toString();
+            let cols = ansStr.length; 
+            
+            let padA = strA.padStart(cols, '0');
+            let padB = strB.padStart(cols, '0');
+            let hintsArr = Array(cols).fill(' ');
+            
+            let carry = 0;
+            for (let i = cols - 1; i >= 0; i--) {
+                let sum = parseInt(padA[i]) + parseInt(padB[i]) + carry;
+                carry = Math.floor(sum / 10);
+                if (carry > 0 && i > 0) {
+                    hintsArr[i - 1] = '1';
+                }
+            }
+            
+            return { type: 'column', a, b, operator: '+', answer: a + b, explanation: t.expAdd, hints: hintsArr };
         }
 
         function generateSubtraction(t, diff) {
@@ -726,7 +750,38 @@
             let a = Math.floor(Math.random() * (maxA - minA)) + minA;
             let b = Math.floor(Math.random() * (maxB - minB)) + minB;
             if (b > a) { let temp = a; a = b; b = temp; }
-            return { type: 'column', a, b, operator: '-', answer: a - b, explanation: t.expSub };
+            
+            // Obliczanie "małych cyfr" (zapożyczeń w odejmowaniu)
+            let strA = a.toString();
+            let strB = b.toString();
+            let cols = strA.length; 
+            
+            let padA = strA.padStart(cols, '0');
+            let padB = strB.padStart(cols, '0');
+            let hintsArr = Array(cols).fill(' ');
+            
+            let topNums = padA.split('').map(Number);
+            let botNums = padB.split('').map(Number);
+            
+            // Symulacja od prawej do lewej, żeby znaleźć gdzie i co pożyczamy
+            for (let i = cols - 1; i >= 0; i--) {
+                if (topNums[i] < botNums[i]) {
+                    let j = i - 1;
+                    while (j >= 0 && topNums[j] === 0) j--; // Szukanie pierwszej nie-zerowej cyfry w lewo
+                    if (j >= 0) {
+                        topNums[j] -= 1;
+                        hintsArr[j] = topNums[j].toString();
+                        for (let k = j + 1; k < i; k++) {
+                            topNums[k] = 9;
+                            hintsArr[k] = '9';
+                        }
+                        topNums[i] += 10;
+                        hintsArr[i] = topNums[i].toString();
+                    }
+                }
+            }
+            
+            return { type: 'column', a, b, operator: '-', answer: a - b, explanation: t.expSub, hints: hintsArr };
         }
 
         function generateAlgebra(t, diff) {
@@ -737,11 +792,11 @@
             if(diff === 3) { min = 15; max = 80; }
             const a = Math.floor(Math.random() * (max - min)) + min;
             const ans = Math.floor(Math.random() * (max - min)) + min; 
-            let qText = '', b = 0;
-            if (type === 'x+a=b') { b = ans + a; qText = `X + ${a} = ${b}`; }
-            else if (type === 'a+x=b') { b = a + ans; qText = `${a} + X = ${b}`; }
-            else { b = ans - a; qText = `X - ${a} = ${b}`; }
-            return { type: 'inline', questionText: qText, answer: ans, explanation: t.expAlg };
+            let qText = '', b = 0, hintText = '';
+            if (type === 'x+a=b') { b = ans + a; qText = `X + ${a} = ${b}`; hintText = `${b} - ${a} = ?`; }
+            else if (type === 'a+x=b') { b = a + ans; qText = `${a} + X = ${b}`; hintText = `${b} - ${a} = ?`; }
+            else { b = ans - a; qText = `X - ${a} = ${b}`; hintText = `${b} + ${a} = ?`; }
+            return { type: 'inline', questionText: qText, answer: ans, explanation: t.expAlg, hintText: hintText };
         }
 
         function generateSequence(t, diff) {
@@ -783,6 +838,7 @@
             questionCount = 0;
             userAnswer = '';
             feedback = null;
+            isHintVisible = false;
             combo = 0;
             sessionCoins = 0;
             nextQuestion(mode);
@@ -792,6 +848,7 @@
         function nextQuestion(mode = gameMode) {
             userAnswer = '';
             feedback = null;
+            isHintVisible = false;
             earnedJustNow = 0;
             const t = TRANSLATIONS[lang];
             
@@ -820,31 +877,116 @@
             const qCont = el('question-container');
             const opacityClass = feedback ? 'opacity-50' : 'opacity-100';
             const pulseClass = feedback ? '' : 'animate-pulse';
-            const displayAns = userAnswer || (feedback ? currentQuestion.answer : '&nbsp;');
+            const displayAns = userAnswer || (feedback ? currentQuestion.answer.toString() : '&nbsp;');
 
             let html = '';
             if (currentQuestion.type === 'column') {
+                // Rozdzielanie na pojedyncze cyfry w celu perfekcyjnego ułożenia w kolumnach wraz z podpowiedziami
+                const strA = currentQuestion.a.toString();
+                const strB = currentQuestion.b.toString();
+                const ansLen = currentQuestion.answer.toString().length;
+                const hintsLen = currentQuestion.hints ? currentQuestion.hints.length : 0;
+                const cols = Math.max(strA.length, strB.length, ansLen, hintsLen);
+                
+                const padA = strA.padStart(cols, ' ').split('');
+                const padB = strB.padStart(cols, ' ').split('');
+                const padUser = userAnswer.padStart(cols, ' ').split('');
+                
+                const padHints = Array(cols).fill(' ');
+                if (currentQuestion.hints) {
+                    let diff = cols - currentQuestion.hints.length;
+                    for(let i=0; i<currentQuestion.hints.length; i++) {
+                        padHints[i + diff] = currentQuestion.hints[i];
+                    }
+                }
+
+                const hintColor = currentQuestion.operator === '+' ? 'text-emerald-400' : 'text-fuchsia-400';
+
+                // Strzałka wskazująca, od której strony zacząć (chowa się po wpisaniu pierwszej cyfry)
+                let arrowHtml = Array(cols).fill(' ').map((_, i) => {
+                    if (i === cols - 1) {
+                        const visClass = userAnswer.length === 0 ? 'text-yellow-400 animate-bounce' : 'opacity-0';
+                        return `<div class="w-8 sm:w-12 flex justify-center ${visClass} drop-shadow-[0_0_8px_rgba(250,204,21,0.6)]">
+                            <i data-lucide="arrow-down" class="w-6 h-6 sm:w-8 sm:h-8 border-2 border-yellow-400 rounded-full p-0.5 bg-yellow-400/20"></i>
+                        </div>`;
+                    }
+                    return `<div class="w-8 sm:w-12"></div>`;
+                }).join('');
+
+                // Podpowiedzi na górze
+                let hintsHtml = padHints.map(h => `<div class="w-8 sm:w-12 text-center text-xl sm:text-2xl font-bold tracking-tighter">${h.replace(' ', '&nbsp;')}</div>`).join('');
+                
+                // Główna liczba (przekreślana, jeśli na górze jest podpowiedź zapożyczenia)
+                let aHtml = padA.map((d, i) => {
+                    let crossOut = (padHints[i] !== ' ' && currentQuestion.operator === '-') ? 'line-through text-slate-500 opacity-80 decoration-fuchsia-500 decoration-2' : '';
+                    return `<div class="w-8 sm:w-12 text-center drop-shadow-[0_0_5px_rgba(255,255,255,0.3)] ${crossOut}">${d.replace(' ', '&nbsp;')}</div>`;
+                }).join('');
+                
+                let bHtml = padB.map(d => `<div class="w-8 sm:w-12 text-center drop-shadow-[0_0_5px_rgba(255,255,255,0.3)]">${d.replace(' ', '&nbsp;')}</div>`).join('');
+                let uHtml = padUser.map(d => `<div class="w-8 sm:w-12 text-center drop-shadow-[0_0_8px_rgba(34,211,238,0.5)]">${d.replace(' ', '&nbsp;')}</div>`).join('');
+                
+                let fallbackAns = currentQuestion.answer.toString().padStart(cols, ' ').split('').map(d => `<div class="w-8 sm:w-12 text-center drop-shadow-[0_0_8px_rgba(34,211,238,0.5)]">${d.replace(' ', '&nbsp;')}</div>`).join('');
+
                 html = `
-                <div class="inline-flex flex-col text-right font-mono text-5xl sm:text-6xl font-bold text-white leading-none transition-opacity duration-300 ${opacityClass}">
-                    <div class="pr-2 tracking-[0.15em] mb-1.5 drop-shadow-[0_0_5px_rgba(255,255,255,0.3)]">${currentQuestion.a}</div>
-                    <div class="flex justify-between items-end mb-1.5">
-                        <span class="pr-4 sm:pr-6 text-4xl sm:text-5xl text-indigo-400">${currentQuestion.operator}</span>
-                        <span class="pr-2 tracking-[0.15em] drop-shadow-[0_0_5px_rgba(255,255,255,0.3)]">${currentQuestion.b}</span>
+                <div class="inline-flex flex-col items-end font-mono text-5xl sm:text-6xl font-bold text-white leading-none transition-opacity duration-300 ${opacityClass}">
+                    
+                    <!-- Strzałka startowa -->
+                    <div class="flex pr-2 mb-1 h-8 sm:h-10">
+                        ${arrowHtml}
                     </div>
-                    <div class="border-b-4 sm:border-b-8 border-indigo-500/70 my-1.5 rounded-full shrink-0 shadow-[0_2px_10px_rgba(99,102,241,0.5)]"></div>
-                    <div class="pr-2 tracking-[0.15em] min-h-[1em] mt-1.5 text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.5)] ${pulseClass}">
-                        ${displayAns}
+
+                    <!-- Podpowiedzi (małe cyferki / zapożyczenia) -->
+                    <div class="flex ${hintColor} mb-1 h-6 sm:h-8 opacity-90 pr-2">
+                        ${hintsHtml}
+                    </div>
+
+                    <!-- Górna liczba -->
+                    <div class="flex mb-1.5 pr-2">
+                        ${aHtml}
+                    </div>
+
+                    <!-- Operator i dolna liczba -->
+                    <div class="flex items-end mb-1.5 w-full justify-between">
+                        <span class="text-4xl sm:text-5xl text-indigo-400 pb-1">${currentQuestion.operator}</span>
+                        <div class="flex pr-2">
+                            ${bHtml}
+                        </div>
+                    </div>
+
+                    <!-- Kreska ułamkowa -->
+                    <div class="border-b-4 sm:border-b-8 border-indigo-500/70 my-1.5 w-full rounded-full shadow-[0_2px_10px_rgba(99,102,241,0.5)]"></div>
+
+                    <!-- Odpowiedź gracza -->
+                    <div class="flex mt-1.5 text-cyan-400 pr-2 ${pulseClass} min-h-[1em]">
+                        ${feedback && userAnswer === '' ? fallbackAns : uHtml}
                     </div>
                 </div>`;
             } else {
                 const textNoQ = currentQuestion.questionText.replace('?', '');
+                
+                let hintHtml = '';
+                if (currentQuestion.hintText) {
+                    if (isHintVisible || feedback !== null) {
+                        hintHtml = `<div class="mt-4 sm:mt-6 text-emerald-400 text-xl sm:text-2xl font-bold tracking-widest opacity-90 drop-shadow-[0_0_8px_rgba(52,211,153,0.6)]">${currentQuestion.hintText}</div>`;
+                    } else {
+                        const t = TRANSLATIONS[lang];
+                        hintHtml = `
+                        <button onclick="revealHint()" class="mt-4 sm:mt-6 flex items-center gap-2 px-4 py-2 bg-emerald-900/40 hover:bg-emerald-800/60 text-emerald-400 border border-emerald-500/50 rounded-full text-sm font-bold transition-all shadow-[0_0_10px_rgba(16,185,129,0.2)] active:scale-95">
+                            <i data-lucide="lightbulb" class="w-4 h-4"></i> <span>${t.showHint}</span>
+                        </button>`;
+                    }
+                }
+                
                 html = `
-                <h2 class="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white tracking-wider text-center w-full break-words px-4 transition-opacity duration-300 drop-shadow-[0_0_8px_rgba(255,255,255,0.2)] ${opacityClass}">
-                    ${textNoQ}
-                    <span class="inline-block min-w-[60px] sm:min-w-[80px] border-b-4 border-indigo-500/70 ml-2 text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.5)] ${pulseClass}">
-                        ${displayAns}
-                    </span>
-                </h2>`;
+                <div class="flex flex-col items-center justify-center w-full">
+                    <h2 class="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white tracking-wider text-center w-full break-words px-4 transition-opacity duration-300 drop-shadow-[0_0_8px_rgba(255,255,255,0.2)] ${opacityClass}">
+                        ${textNoQ}
+                        <span class="inline-block min-w-[60px] sm:min-w-[80px] border-b-4 border-indigo-500/70 ml-2 text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.5)] ${pulseClass}">
+                            ${displayAns}
+                        </span>
+                    </h2>
+                    ${hintHtml}
+                </div>`;
             }
             qCont.innerHTML = html;
             el('question-explanation').innerText = currentQuestion.explanation;
@@ -862,14 +1004,34 @@
         function handleNumpad(num) {
             if (feedback) return;
             if (userAnswer.length < 4) {
-                userAnswer += num.toString();
+                if (currentQuestion && currentQuestion.type === 'column') {
+                    // Działania pod kreską: dodajemy cyfry od lewej strony (od tyłu)
+                    userAnswer = num.toString() + userAnswer;
+                } else {
+                    // Normalne równania: dodajemy cyfry od prawej strony
+                    userAnswer += num.toString();
+                }
                 renderGameUI();
             }
         }
 
         function handleBackspace() {
             if (feedback) return;
-            userAnswer = userAnswer.slice(0, -1);
+            if (userAnswer.length > 0) {
+                if (currentQuestion && currentQuestion.type === 'column') {
+                    // Działania pod kreską: usuwamy ostatnio wpisaną (pierwszą z lewej)
+                    userAnswer = userAnswer.slice(1);
+                } else {
+                    // Normalne równania: usuwamy ostatnią z prawej
+                    userAnswer = userAnswer.slice(0, -1);
+                }
+                renderGameUI();
+            }
+        }
+
+        function revealHint() {
+            if (feedback) return;
+            isHintVisible = true;
             renderGameUI();
         }
 

@@ -100,7 +100,7 @@
             .print-subtitle { font-family: 'Cinzel', serif !important; font-size: 1.5rem !important; font-weight: 700 !important; color: #e2e8f0 !important; text-transform: uppercase !important; letter-spacing: 0.3em !important; margin: 0 0 1.5rem 0 !important; border-bottom: 1px solid #d4af37 !important; padding-bottom: 1rem !important; width: 80% !important; text-align: center !important; }
             .print-text { font-family: 'Montserrat', sans-serif !important; color: #94a3b8 !important; text-transform: uppercase !important; letter-spacing: 2px !important; font-size: 1rem !important; margin: 1rem 0 !important; }
             .print-rank-value { font-family: 'Cinzel', serif !important; font-size: 3.5rem !important; color: #f8fafc !important; margin: 0.5rem 0 1.5rem 0 !important; letter-spacing: 0.1em !important; }
-            .print-solved-value { font-family: 'Cinzel', serif !important; font-size: 4rem !important; color: #d4af37 !important; margin: 0.5rem 0 !important; }
+            .print-solved-value { font-family: 'Cinzel', serif !important; font-size: 4rem !important; color: #d4af37 !important; margin: 0.2rem 0 !important; }
             .print-footer { width: 100% !important; position: absolute !important; bottom: 4rem !important; padding: 0 4rem !important; box-sizing: border-box !important; display: flex !important; justify-content: space-between !important; align-items: flex-end !important; }
             
             .no-print { display: none !important; }
@@ -363,8 +363,11 @@
                         <span id="cert-rank-display" class="font-bold">Kadett</span>
                     </div>
                     <div class="flex justify-between items-center">
-                        <span id="t-solvedTasks" class="text-slate-300 text-sm">Rozwiązanych zadań:</span>
+                        <span id="t-solvedTasks" class="text-slate-300 text-sm">Rozwiązanych zadań ogółem:</span>
                         <span id="cert-solved-display" class="font-bold text-yellow-400">0</span>
+                    </div>
+                    <div id="cert-breakdown" class="text-xs text-slate-400 mt-2 pt-2 border-t border-slate-700/50 grid grid-cols-2 gap-1">
+                        <!-- Podział zadań wstrzykiwany przez JS -->
                     </div>
                 </div>
 
@@ -400,8 +403,11 @@
                 <p id="p-achievedRank" class="print-text">Który(a) uzyskał(a) rangę:</p>
                 <div id="p-rank" class="print-rank-value">Kadett</div>
                 
-                <p id="p-solvedCorrectly" class="print-text">Rozwiązano poprawnie zadań:</p>
-                <div id="p-solved" class="print-solved-value">0</div>
+                <p id="p-solvedCorrectly" class="print-text">Rozwiązano poprawnie zadań ogółem:</p>
+                <div id="p-solved" class="print-solved-value" style="margin-bottom: 0.2rem !important;">0</div>
+                <div id="p-breakdown" style="font-family: 'Montserrat', sans-serif !important; font-size: 0.9rem !important; color: #94a3b8 !important; display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap; margin-bottom: 1rem;">
+                    <!-- Podział zadań na wydruku wstrzykiwany przez JS -->
+                </div>
             </div>
 
             <div class="print-footer">
@@ -471,10 +477,10 @@
                 certInfo: "Wypełnij dane, aby wygenerować oficjalny Certyfikat Kosmicznej Matematyki z Twoją aktualną rangą i wynikiem!",
                 cadetName: "Imię i Nazwisko Kadeta (Dziecka):", placeholderStudent: "np. Jan Kowalski",
                 commanderName: "Dowódca misji (Nauczyciel/Rodzic):", placeholderTeacher: "np. mgr Anna Nowak",
-                certData: "Dane na dyplomie:", currentRank: "Aktualna Ranga:", solvedTasks: "Rozwiązanych zadań:",
+                certData: "Dane na dyplomie:", currentRank: "Aktualna Ranga:", solvedTasks: "Rozwiązanych zadań ogółem:",
                 printBtn: "DRUKUJ CERTYFIKAT", printTip: 'W ustawieniach drukowania pamiętaj włączyć "Drukuj tła / Background graphics"!',
                 certWord: "CERTYFIKAT", certSub: "Kosmicznej Matematyki", receives: "Otrzymuje:",
-                achievedRank: "Który(a) uzyskał(a) rangę:", solvedCorrectly: "Rozwiązano poprawnie zadań:",
+                achievedRank: "Który(a) uzyskał(a) rangę:", solvedCorrectly: "Rozwiązano poprawnie zadań ogółem:",
                 missionDate: "Data misji:", congrats: "Gratulacje od Dowództwa Galaktyki!",
                 commander: "Dowódca misji:", author: "Autor aplikacji:",
                 expAdd: "Pamiętaj o dodawaniu jedności do jedności, dziesiątek do dziesiątek...",
@@ -484,7 +490,8 @@
                 rank1: "Kosmiczny Kadet", rank2: "Odkrywca Planet", rank3: "Kapitan Galaktyki",
                 rank4: "Mistrz Grawitacji", rank5: "Strażnik Wszechświata",
                 diffEasy: "Łatwy", diffMed: "Średni", diffHard: "Trudny",
-                showHint: "Pokaż podpowiedź"
+                showHint: "Pokaż podpowiedź",
+                catAdd: "Dodawanie", catSub: "Odejmowanie", catAlg: "Algebra (X)", catSeq: "Ciągi"
             },
             is: {
                 appTitle: "Geimstærðfræði", goal: "Markmið", coins: "mynt",
@@ -499,10 +506,10 @@
                 certInfo: "Fylltu út gögnin til að búa til opinbert skírteini í Geimstærðfræði með núverandi stöðu og árangri!",
                 cadetName: "Nafn Kadetts (Barnsins):", placeholderStudent: "t.d. Jón Jónsson",
                 commanderName: "Leiðangursstjóri (Kennari/Foreldri):", placeholderTeacher: "t.d. Anna Jónsdóttir",
-                certData: "Gögn á prófskírteini:", currentRank: "Núverandi Staða:", solvedTasks: "Leyst verkefni:",
+                certData: "Gögn á prófskírteini:", currentRank: "Núverandi Staða:", solvedTasks: "Leyst verkefni alls:",
                 printBtn: "PRENTA SKÍRTEINI", printTip: 'Í prentstillingum, mundu að kveikja á "Prenta bakgrunn / Background graphics"!',
                 certWord: "SKÍRTEINI", certSub: "Í Geimstærðfræði", receives: "Veitist:",
-                achievedRank: "Fyrir að ná stöðunni:", solvedCorrectly: "Fjöldi réttra svara:",
+                achievedRank: "Fyrir að ná stöðunni:", solvedCorrectly: "Heildarfjöldi réttra svara:",
                 missionDate: "Dagsetning:", congrats: "Til hamingju frá Geimstjórn!",
                 commander: "Leiðangursstjóri:", author: "Höfundur forrits:",
                 expAdd: "Mundu að leggja saman einingar við einingar, tugi við tugi...",
@@ -512,7 +519,8 @@
                 rank1: "Geimkadett", rank2: "Reikistjörnukönnuður", rank3: "Vetrarbrautarkapteinn",
                 rank4: "Þyngdaraflsmeistari", rank5: "Vörður Alheimsins",
                 diffEasy: "Auðvelt", diffMed: "Miðlungs", diffHard: "Erfitt",
-                showHint: "Sýna vísbendingu"
+                showHint: "Sýna vísbendingu",
+                catAdd: "Samlagning", catSub: "Frádráttur", catAlg: "Algebru (X)", catSeq: "Raðir"
             },
             en: {
                 appTitle: "Space Math", goal: "Goal", coins: "coins",
@@ -527,10 +535,10 @@
                 certInfo: "Fill in the details to generate an official Space Math Certificate with your current rank and score!",
                 cadetName: "Cadet's Name (Child):", placeholderStudent: "e.g. John Doe",
                 commanderName: "Mission Commander (Teacher/Parent):", placeholderTeacher: "e.g. Mr. Smith",
-                certData: "Diploma data:", currentRank: "Current Rank:", solvedTasks: "Solved tasks:",
+                certData: "Diploma data:", currentRank: "Current Rank:", solvedTasks: "Total solved tasks:",
                 printBtn: "PRINT CERTIFICATE", printTip: 'In print settings, remember to enable "Print backgrounds / Background graphics"!',
                 certWord: "CERTIFICATE", certSub: "Of Space Mathematics", receives: "Awarded to:",
-                achievedRank: "Who achieved the rank:", solvedCorrectly: "Correctly solved tasks:",
+                achievedRank: "Who achieved the rank:", solvedCorrectly: "Total correctly solved tasks:",
                 missionDate: "Mission date:", congrats: "Congratulations from Space Command!",
                 commander: "Mission Commander:", author: "App author:",
                 expAdd: "Remember to add ones to ones, tens to tens...",
@@ -540,7 +548,8 @@
                 rank1: "Space Cadet", rank2: "Planet Explorer", rank3: "Galaxy Captain",
                 rank4: "Gravity Master", rank5: "Guardian of the Universe",
                 diffEasy: "Easy", diffMed: "Medium", diffHard: "Hard",
-                showHint: "Show hint"
+                showHint: "Show hint",
+                catAdd: "Addition", catSub: "Subtraction", catAlg: "Algebra (X)", catSeq: "Sequences"
             }
         };
 
@@ -548,6 +557,12 @@
         let lang = localStorage.getItem('spaceMathLang') || 'pl';
         let totalCoins = parseInt(localStorage.getItem('spaceMathCoins') || '0', 10);
         let totalSolved = parseInt(localStorage.getItem('spaceMathSolved') || '0', 10);
+        
+        let solvedAdd = parseInt(localStorage.getItem('spaceMathSolvedAdd') || '0', 10);
+        let solvedSub = parseInt(localStorage.getItem('spaceMathSolvedSub') || '0', 10);
+        let solvedAlg = parseInt(localStorage.getItem('spaceMathSolvedAlg') || '0', 10);
+        let solvedSeq = parseInt(localStorage.getItem('spaceMathSolvedSeq') || '0', 10);
+
         let gameMode = null;
         let score = 0;
         let questionCount = 0;
@@ -672,6 +687,24 @@
             el('cert-solved-display').innerText = totalSolved;
             el('p-rank').innerText = rankInfo.title;
             el('p-solved').innerText = totalSolved;
+
+            // Wypełnianie rozbicia na dyplomie (UI)
+            let breakdownHtml = `
+                <div>${t.catAdd}: <span class="text-yellow-400 font-bold">${solvedAdd}</span></div>
+                <div>${t.catSub}: <span class="text-yellow-400 font-bold">${solvedSub}</span></div>
+                <div>${t.catAlg}: <span class="text-yellow-400 font-bold">${solvedAlg}</span></div>
+                <div>${t.catSeq}: <span class="text-yellow-400 font-bold">${solvedSeq}</span></div>
+            `;
+            el('cert-breakdown').innerHTML = breakdownHtml;
+
+            // Wypełnianie rozbicia na wygenerowanym wydruku
+            let printBreakdownHtml = `
+                <span>${t.catAdd}: <strong style="color:#d4af37">${solvedAdd}</strong></span>
+                <span>${t.catSub}: <strong style="color:#d4af37">${solvedSub}</strong></span>
+                <span>${t.catAlg}: <strong style="color:#d4af37">${solvedAlg}</strong></span>
+                <span>${t.catSeq}: <strong style="color:#d4af37">${solvedSeq}</strong></span>
+            `;
+            el('p-breakdown').innerHTML = printBreakdownHtml;
 
             if (rankInfo.nextAt) {
                 el('progress-container').style.display = 'block';
@@ -1047,9 +1080,18 @@
                 sessionCoins += earnedJustNow;
                 totalCoins += earnedJustNow;
                 totalSolved += 1;
+
+                if (gameMode === 'add') solvedAdd += 1;
+                else if (gameMode === 'sub') solvedSub += 1;
+                else if (gameMode === 'algebra') solvedAlg += 1;
+                else if (gameMode === 'sequence') solvedSeq += 1;
                 
                 localStorage.setItem('spaceMathCoins', totalCoins.toString());
                 localStorage.setItem('spaceMathSolved', totalSolved.toString());
+                localStorage.setItem('spaceMathSolvedAdd', solvedAdd.toString());
+                localStorage.setItem('spaceMathSolvedSub', solvedSub.toString());
+                localStorage.setItem('spaceMathSolvedAlg', solvedAlg.toString());
+                localStorage.setItem('spaceMathSolvedSeq', solvedSeq.toString());
                 
                 feedback = 'correct';
                 score += 1;

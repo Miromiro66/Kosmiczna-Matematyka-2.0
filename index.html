@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Kosmiczna Matematyka</title>
+    
+    <!-- Czcionki Google -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS (wersja CDN do pojedynczego pliku) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Ikony Lucide -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        /* Animacja gwiazd (Warp Speed) */
+        @keyframes fly-out {
+            0% { transform: translateY(0) scale(0.1); opacity: 0; }
+            20% { opacity: var(--star-opacity); }
+            80% { opacity: var(--star-opacity); }
+            100% { transform: translateY(var(--star-distance)) scale(3); opacity: 0; }
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            /* Zabezpieczenie przed pull-to-refresh na telefonach */
+            overscroll-behavior: none; 
+        }
+
+        /* Ukrywanie paska przewijania (opcjonalne, dla czystszego widoku) */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 10px; }
+
+        /* =========================================
+           STYLE DO DRUKU (CERTYFIKAT)
+        ========================================= */
+        @media print {
+            @page { size: A4 portrait; margin: 0; }
+            body * { visibility: hidden; }
+            
+            html, body {
+                width: 100% !important;
+                height: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                background-color: #0b1120 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
+            }
+            
+            #diploma-print-area, #diploma-print-area * { visibility: visible; }
+            
+            #diploma-print-area { 
+                position: fixed !important; 
+                left: 0 !important; 
+                top: 0 !important; 
+                width: 100vw !important; 
+                height: 100vh !important; 
+                display: flex !important; 
+                justify-content: center !important; 
+                align-items: center !important; 
+                margin: 0 !important;
+                padding: 0 !important;
+                z-index: 9999 !important;
+                background-color: #0b1120 !important; 
+                font-family: 'Montserrat', sans-serif !important;
+            }
+
+            .print-bg-img {
+                position: absolute !important;
+                top: 0 !important; left: 0 !important;
+                width: 100vw !important; height: 100vh !important;
+                object-fit: cover !important;
+                opacity: 0.75 !important;
+                z-index: -2 !important;
+            }
+            .print-bg-overlay {
+                position: absolute !important;
+                top: 0 !important; left: 0 !important;
+                width: 100vw !important; height: 100vh !important;
+                background: linear-gradient(180deg, rgba(11,17,32,0.85) 0%, rgba(11,17,32,0.2) 100%) !important;
+                z-index: -1 !important;
+            }
+            .print-diploma-border {
+                position: relative !important; z-index: 10 !important;
+                width: 88% !important; height: 94% !important;
+                border: 3px solid #d4af37 !important; 
+                outline: 15px solid rgba(212, 175, 55, 0.1) !important; 
+                outline-offset: -20px !important;
+                padding: 4rem 3rem !important;
+                display: flex !important; flex-direction: column !important; align-items: center !important;
+                box-sizing: border-box !important;
+                background: rgba(15, 23, 42, 0.7) !important;
+            }
+            .print-title { font-family: 'Cinzel', serif !important; font-size: 3.5rem !important; font-weight: 900 !important; color: #d4af37 !important; margin: 0 0 0.5rem 0 !important; letter-spacing: 0.15em !important; }
+            .print-subtitle { font-family: 'Cinzel', serif !important; font-size: 1.5rem !important; font-weight: 700 !important; color: #e2e8f0 !important; text-transform: uppercase !important; letter-spacing: 0.3em !important; margin: 0 0 1.5rem 0 !important; border-bottom: 1px solid #d4af37 !important; padding-bottom: 1rem !important; width: 80% !important; text-align: center !important; }
+            .print-text { font-family: 'Montserrat', sans-serif !important; color: #94a3b8 !important; text-transform: uppercase !important; letter-spacing: 2px !important; font-size: 1rem !important; margin: 1rem 0 !important; }
+            .print-rank-value { font-family: 'Cinzel', serif !important; font-size: 3.5rem !important; color: #f8fafc !important; margin: 0.5rem 0 1.5rem 0 !important; letter-spacing: 0.1em !important; }
+            .print-solved-value { font-family: 'Cinzel', serif !important; font-size: 4rem !important; color: #d4af37 !important; margin: 0.5rem 0 !important; }
+            .print-footer { width: 100% !important; position: absolute !important; bottom: 4rem !important; padding: 0 4rem !important; box-sizing: border-box !important; display: flex !important; justify-content: space-between !important; align-items: flex-end !important; }
+            
+            .no-print { display: none !important; }
+        }
+    </style>
+</head>
+<body class="bg-black text-slate-100 overflow-x-hidden">
+
+    <!-- TŁO I GWIAZDY -->
+    <div class="fixed inset-0 min-h-[100dvh] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900 via-slate-900 to-black z-[-2]"></div>
+    <div id="starfield" class="fixed inset-0 overflow-hidden pointer-events-none z-[-1]"></div>
+
+    <!-- GŁÓWNY KONTENER APLIKACJI -->
+    <div class="min-h-[100dvh] flex flex-col items-center justify-center p-4 relative z-10 w-full">
+        
+        <!-- EKRAN MENU -->
+        <div id="menu-screen" class="max-w-md w-full bg-slate-800/60 backdrop-blur-md rounded-3xl shadow-2xl shadow-indigo-900/50 overflow-hidden border border-slate-700/50 no-print transition-opacity duration-300">
+            <div class="bg-gradient-to-r from-indigo-600/80 to-purple-700/80 p-6 text-center shadow-md relative overflow-hidden">
+                <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-30 mix-blend-overlay pointer-events-none"></div>
+                
+                <!-- Flagi języków -->
+                <div class="flex justify-center gap-4 mb-4 relative z-20">
+                    <button onclick="setLang('pl')" id="flag-pl" class="w-9 h-9 rounded-full overflow-hidden border-2 border-transparent opacity-50 hover:opacity-100 hover:scale-110 transition-all">
+                        <img src="https://flagcdn.com/w80/pl.png" alt="PL" class="w-full h-full object-cover" />
+                    </button>
+                    <button onclick="setLang('is')" id="flag-is" class="w-9 h-9 rounded-full overflow-hidden border-2 border-transparent opacity-50 hover:opacity-100 hover:scale-110 transition-all">
+                        <img src="https://flagcdn.com/w80/is.png" alt="IS" class="w-full h-full object-cover" />
+                    </button>
+                    <button onclick="setLang('en')" id="flag-en" class="w-9 h-9 rounded-full overflow-hidden border-2 border-transparent opacity-50 hover:opacity-100 hover:scale-110 transition-all">
+                        <img src="https://flagcdn.com/w80/gb.png" alt="EN" class="w-full h-full object-cover" />
+                    </button>
+                </div>
+
+                <h1 class="text-3xl sm:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-white to-indigo-200 tracking-tight drop-shadow-sm mb-2 relative z-10 flex justify-center items-center gap-2">
+                    <i data-lucide="sparkles" class="text-yellow-300 w-8 h-8"></i>
+                    <span id="t-appTitle">Kosmiczna Matma</span>
+                </h1>
+                
+                <!-- Karta Profilu -->
+                <div class="mt-4 bg-black/30 backdrop-blur-sm rounded-2xl p-4 border border-white/10 relative z-10">
+                    <div class="flex justify-between items-center mb-2">
+                        <div class="flex items-center gap-2">
+                            <div id="menu-rank-icon-container" class="p-1.5 rounded-full bg-slate-800 border border-slate-600 shadow-[0_0_10px_rgba(255,255,255,0.1)] text-slate-400">
+                                <i id="menu-rank-icon" data-lucide="rocket" class="w-5 h-5"></i>
+                            </div>
+                            <span id="menu-rank-title" class="text-white font-bold text-sm sm:text-base">Kosmiczny Kadet</span>
+                        </div>
+                        <div class="flex items-center text-yellow-400 font-bold text-lg drop-shadow-[0_0_5px_rgba(250,204,21,0.5)]">
+                            <i data-lucide="coins" class="w-5 h-5 mr-1"></i>
+                            <span id="menu-total-coins">0</span>
+                        </div>
+                    </div>
+                    
+                    <div id="progress-container" class="mt-3">
+                        <div class="flex justify-between text-indigo-200 text-xs mb-1 font-medium">
+                            <span id="t-goal-text">Cel: 100 monet</span>
+                            <span id="menu-progress-pct">0%</span>
+                        </div>
+                        <div class="h-2.5 w-full bg-slate-900/80 rounded-full overflow-hidden border border-slate-700">
+                            <div id="menu-progress-bar" class="h-full bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(56,189,248,0.5)]" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-6 grid gap-4">
+                <!-- Wybór poziomu trudności -->
+                <div class="flex justify-between bg-slate-900/60 p-1.5 rounded-2xl border border-slate-700/50 mb-2 relative z-20">
+                    <button onclick="setDifficulty(1)" id="btn-diff-1" class="flex-1 py-2 text-sm font-bold rounded-xl transition-all text-emerald-400 opacity-50 hover:opacity-100"><span id="t-diffEasy">Łatwy</span> (x1)</button>
+                    <button onclick="setDifficulty(2)" id="btn-diff-2" class="flex-1 py-2 text-sm font-bold rounded-xl transition-all text-cyan-400 shadow-[0_0_10px_rgba(34,211,238,0.3)] bg-slate-700/80 border border-slate-600 text-white"><span id="t-diffMed">Średni</span> (x2)</button>
+                    <button onclick="setDifficulty(3)" id="btn-diff-3" class="flex-1 py-2 text-sm font-bold rounded-xl transition-all text-fuchsia-400 opacity-50 hover:opacity-100"><span id="t-diffHard">Trudny</span> (x3)</button>
+                </div>
+
+                <button onclick="startGame('add')" class="group flex items-center p-4 bg-slate-800/80 hover:bg-slate-700/80 rounded-2xl transition-all duration-200 border border-slate-600 hover:border-indigo-400 hover:shadow-[0_0_15px_rgba(99,102,241,0.3)] w-full">
+                    <div class="bg-gradient-to-br from-blue-500 to-indigo-600 p-3 rounded-xl text-white shadow-lg group-hover:scale-110 transition-transform">
+                        <i data-lucide="rocket" class="w-7 h-7"></i>
+                    </div>
+                    <div class="ml-4 text-left">
+                        <h2 id="t-addTitle" class="text-xl font-bold text-white">Start Rakiety</h2>
+                        <p id="t-addDesc" class="text-sm text-indigo-300">Dodawanie dużych liczb</p>
+                    </div>
+                </button>
+
+                <button onclick="startGame('sub')" class="group flex items-center p-4 bg-slate-800/80 hover:bg-slate-700/80 rounded-2xl transition-all duration-200 border border-slate-600 hover:border-fuchsia-400 hover:shadow-[0_0_15px_rgba(232,121,249,0.3)] w-full">
+                    <div class="bg-gradient-to-br from-fuchsia-500 to-purple-600 p-3 rounded-xl text-white shadow-lg group-hover:scale-110 transition-transform">
+                        <i data-lucide="zap" class="w-7 h-7"></i>
+                    </div>
+                    <div class="ml-4 text-left">
+                        <h2 id="t-subTitle" class="text-xl font-bold text-white">Błyskawica</h2>
+                        <p id="t-subDesc" class="text-sm text-indigo-300">Kosmiczne odejmowanie</p>
+                    </div>
+                </button>
+
+                <button onclick="startGame('algebra')" class="group flex items-center p-4 bg-slate-800/80 hover:bg-slate-700/80 rounded-2xl transition-all duration-200 border border-slate-600 hover:border-emerald-400 hover:shadow-[0_0_15px_rgba(52,211,153,0.3)] w-full">
+                    <div class="bg-gradient-to-br from-emerald-400 to-teal-600 p-3 rounded-xl text-white shadow-lg group-hover:scale-110 transition-transform">
+                        <i data-lucide="radar" class="w-7 h-7"></i>
+                    </div>
+                    <div class="ml-4 text-left">
+                        <h2 id="t-algTitle" class="text-xl font-bold text-white">Sygnał X</h2>
+                        <p id="t-algDesc" class="text-sm text-indigo-300">Znajdź nieznaną wartość</p>
+                    </div>
+                </button>
+
+                <button onclick="startGame('sequence')" class="group flex items-center p-4 bg-slate-800/80 hover:bg-slate-700/80 rounded-2xl transition-all duration-200 border border-slate-600 hover:border-cyan-400 hover:shadow-[0_0_15px_rgba(34,211,238,0.3)] w-full">
+                    <div class="bg-gradient-to-br from-cyan-400 to-blue-600 p-3 rounded-xl text-white shadow-lg group-hover:scale-110 transition-transform">
+                        <i data-lucide="orbit" class="w-7 h-7"></i>
+                    </div>
+                    <div class="ml-4 text-left">
+                        <h2 id="t-seqTitle" class="text-xl font-bold text-white">Orbity i Ciągi</h2>
+                        <p id="t-seqDesc" class="text-sm text-indigo-300">Odkryj galaktyczną regułę</p>
+                    </div>
+                </button>
+
+                <div class="mt-2 pt-4 border-t border-slate-700/50">
+                    <button onclick="showScreen('certificate-screen')" class="w-full flex justify-center items-center gap-2 py-3 bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-500 hover:to-orange-500 text-white rounded-xl font-bold text-md transition-all shadow-[0_0_15px_rgba(234,179,8,0.3)] active:scale-95 border border-yellow-400/50">
+                        <i data-lucide="scroll" class="w-5 h-5"></i>
+                        <span id="t-certBtn">Generuj Certyfikat</span>
+                    </button>
+                </div>
+
+                <div class="mt-2 text-center">
+                    <p class="text-xs text-slate-500">
+                        <span id="t-author">Autor aplikacji:</span> <span class="text-indigo-400 font-semibold">Mirosław Józef "Miras"</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- EKRAN GRY -->
+        <div id="game-screen" class="hidden max-w-md w-full bg-slate-900/80 backdrop-blur-md sm:rounded-3xl shadow-2xl shadow-black/50 overflow-hidden flex flex-col min-h-[100dvh] sm:min-h-[650px] sm:h-auto border-x sm:border border-slate-700 no-print">
+            
+            <div class="flex justify-between items-center p-4 bg-slate-800/80 border-b border-slate-700 shrink-0">
+                <button onclick="showScreen('menu-screen')" class="p-2 text-indigo-300 hover:text-white hover:bg-slate-700 rounded-full transition-colors">
+                    <i data-lucide="arrow-left" class="w-6 h-6"></i>
+                </button>
+                
+                <div id="combo-container" class="hidden flex gap-2 items-center">
+                    <div class="flex items-center text-orange-400 bg-orange-900/40 px-3 py-1 rounded-full font-bold text-sm animate-pulse border border-orange-500/50 shadow-[0_0_10px_rgba(249,115,22,0.4)]">
+                        <i data-lucide="flame" class="w-4 h-4 mr-1 text-orange-500 fill-orange-500"></i>
+                        Combo x<span id="combo-value">2</span>!
+                    </div>
+                </div>
+
+                <div class="flex gap-4 items-center">
+                    <div class="flex items-center text-yellow-400 font-bold bg-black/40 px-3 py-1 rounded-full border border-yellow-500/30 shadow-[0_0_8px_rgba(250,204,21,0.2)]">
+                        <i data-lucide="coins" class="w-4 h-4 mr-1"></i> <span id="game-session-coins">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="w-full bg-slate-800 h-1.5 flex shrink-0">
+                <div id="game-progress-bar" class="bg-gradient-to-r from-cyan-400 to-blue-500 h-full transition-all duration-300 shadow-[0_0_8px_rgba(56,189,248,0.8)]" style="width: 0%;"></div>
+            </div>
+
+            <div class="flex-1 flex flex-col relative min-h-[250px] sm:min-h-[300px]">
+                
+                <!-- Powiadomienia -->
+                <div id="feedback-correct" class="hidden absolute top-2 left-0 right-0 flex flex-col items-center z-10 pointer-events-none">
+                    <div class="bg-emerald-500/20 backdrop-blur-sm border border-emerald-500/50 text-emerald-300 px-6 py-1.5 sm:py-2 rounded-full font-bold flex items-center shadow-[0_0_15px_rgba(16,185,129,0.3)] mb-1 transform scale-110">
+                        <i data-lucide="check" class="w-5 h-5 mr-2"></i> <span id="t-great">Świetnie!</span>
+                    </div>
+                    <div class="text-yellow-400 font-extrabold text-lg sm:text-xl animate-bounce drop-shadow-[0_0_8px_rgba(250,204,21,0.8)]">
+                        +<span id="earned-just-now">10</span> 🪙
+                    </div>
+                </div>
+
+                <div id="feedback-incorrect" class="hidden absolute top-2 left-0 right-0 flex flex-col items-center z-10 pointer-events-none">
+                    <div class="bg-red-500/20 backdrop-blur-sm border border-red-500/50 text-red-300 px-6 py-1.5 sm:py-2 rounded-full font-bold flex items-center shadow-[0_0_15px_rgba(239,68,68,0.3)] transform scale-110">
+                        <i data-lucide="x" class="w-5 h-5 mr-2"></i> <span id="t-correctWas">Prawidłowo:</span>&nbsp;<span id="correct-answer-display"></span>
+                    </div>
+                    <div id="combo-broken-msg" class="hidden text-slate-400 mt-1 text-xs sm:text-sm"><span id="t-comboBroken">Seria przerwana :(</span></div>
+                </div>
+
+                <!-- Obszar Pytania -->
+                <div id="question-container" class="flex-1 flex flex-col items-center justify-center w-full py-8 z-10 transition-opacity duration-300">
+                    <!-- Generowane dynamicznie przez JS -->
+                </div>
+                
+                <p id="question-explanation" class="mt-4 sm:mt-6 text-indigo-300 text-center text-xs sm:text-sm px-4 shrink-0 max-w-[80%] mx-auto font-medium mb-4">
+                    <!-- Wyjaśnienie -->
+                </p>
+            </div>
+
+            <!-- Numpad -->
+            <div class="bg-slate-800/60 backdrop-blur-md p-2 sm:p-4 pb-4 sm:pb-8 sm:rounded-t-3xl border-t border-slate-700 shrink-0 relative z-10 shadow-[0_-10px_20px_rgba(0,0,0,0.3)]">
+                <div class="grid grid-cols-3 gap-2 sm:gap-3">
+                    <button onclick="handleNumpad(1)" class="numpad-btn bg-slate-700/80 hover:bg-indigo-600/50 text-white text-xl sm:text-3xl font-bold py-3 sm:py-4 rounded-xl sm:rounded-2xl border-b-4 border-slate-900 active:border-b-0 active:translate-y-1 transition-all shadow-[0_4px_6px_rgba(0,0,0,0.3)] hover:shadow-[0_0_15px_rgba(99,102,241,0.4)] hover:text-cyan-300">1</button>
+                    <button onclick="handleNumpad(2)" class="numpad-btn bg-slate-700/80 hover:bg-indigo-600/50 text-white text-xl sm:text-3xl font-bold py-3 sm:py-4 rounded-xl sm:rounded-2xl border-b-4 border-slate-900 active:border-b-0 active:translate-y-1 transition-all shadow-[0_4px_6px_rgba(0,0,0,0.3)] hover:shadow-[0_0_15px_rgba(99,102,241,0.4)] hover:text-cyan-300">2</button>
+                    <button onclick="handleNumpad(3)" class="numpad-btn bg-slate-700/80 hover:bg-indigo-600/50 text-white text-xl sm:text-3xl font-bold py-3 sm:py-4 rounded-xl sm:rounded-2xl border-b-4 border-slate-900 active:border-b-0 active:translate-y-1 transition-all shadow-[0_4px_6px_rgba(0,0,0,0.3)] hover:shadow-[0_0_15px_rgba(99,102,241,0.4)] hover:text-cyan-300">3</button>
+                    <button onclick="handleNumpad(4)" class="numpad-btn bg-slate-700/80 hover:bg-indigo-600/50 text-white text-xl sm:text-3xl font-bold py-3 sm:py-4 rounded-xl sm:rounded-2xl border-b-4 border-slate-900 active:border-b-0 active:translate-y-1 transition-all shadow-[0_4px_6px_rgba(0,0,0,0.3)] hover:shadow-[0_0_15px_rgba(99,102,241,0.4)] hover:text-cyan-300">4</button>
+                    <button onclick="handleNumpad(5)" class="numpad-btn bg-slate-700/80 hover:bg-indigo-600/50 text-white text-xl sm:text-3xl font-bold py-3 sm:py-4 rounded-xl sm:rounded-2xl border-b-4 border-slate-900 active:border-b-0 active:translate-y-1 transition-all shadow-[0_4px_6px_rgba(0,0,0,0.3)] hover:shadow-[0_0_15px_rgba(99,102,241,0.4)] hover:text-cyan-300">5</button>
+                    <button onclick="handleNumpad(6)" class="numpad-btn bg-slate-700/80 hover:bg-indigo-600/50 text-white text-xl sm:text-3xl font-bold py-3 sm:py-4 rounded-xl sm:rounded-2xl border-b-4 border-slate-900 active:border-b-0 active:translate-y-1 transition-all shadow-[0_4px_6px_rgba(0,0,0,0.3)] hover:shadow-[0_0_15px_rgba(99,102,241,0.4)] hover:text-cyan-300">6</button>
+                    <button onclick="handleNumpad(7)" class="numpad-btn bg-slate-700/80 hover:bg-indigo-600/50 text-white text-xl sm:text-3xl font-bold py-3 sm:py-4 rounded-xl sm:rounded-2xl border-b-4 border-slate-900 active:border-b-0 active:translate-y-1 transition-all shadow-[0_4px_6px_rgba(0,0,0,0.3)] hover:shadow-[0_0_15px_rgba(99,102,241,0.4)] hover:text-cyan-300">7</button>
+                    <button onclick="handleNumpad(8)" class="numpad-btn bg-slate-700/80 hover:bg-indigo-600/50 text-white text-xl sm:text-3xl font-bold py-3 sm:py-4 rounded-xl sm:rounded-2xl border-b-4 border-slate-900 active:border-b-0 active:translate-y-1 transition-all shadow-[0_4px_6px_rgba(0,0,0,0.3)] hover:shadow-[0_0_15px_rgba(99,102,241,0.4)] hover:text-cyan-300">8</button>
+                    <button onclick="handleNumpad(9)" class="numpad-btn bg-slate-700/80 hover:bg-indigo-600/50 text-white text-xl sm:text-3xl font-bold py-3 sm:py-4 rounded-xl sm:rounded-2xl border-b-4 border-slate-900 active:border-b-0 active:translate-y-1 transition-all shadow-[0_4px_6px_rgba(0,0,0,0.3)] hover:shadow-[0_0_15px_rgba(99,102,241,0.4)] hover:text-cyan-300">9</button>
+                    
+                    <button onclick="handleBackspace()" class="numpad-btn bg-slate-900/80 hover:bg-red-900/50 text-slate-300 hover:text-red-300 text-xl sm:text-2xl font-bold py-3 sm:py-4 rounded-xl sm:rounded-2xl border-b-4 border-black active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center shadow-[0_4px_6px_rgba(0,0,0,0.5)]">⌫</button>
+                    <button onclick="handleNumpad(0)" class="numpad-btn bg-slate-700/80 hover:bg-indigo-600/50 text-white text-xl sm:text-3xl font-bold py-3 sm:py-4 rounded-xl sm:rounded-2xl border-b-4 border-slate-900 active:border-b-0 active:translate-y-1 transition-all shadow-[0_4px_6px_rgba(0,0,0,0.3)] hover:shadow-[0_0_15px_rgba(99,102,241,0.4)] hover:text-cyan-300">0</button>
+                    <button id="submit-btn" onclick="checkAnswer()" class="numpad-btn bg-gradient-to-b from-emerald-500 to-emerald-700 hover:from-emerald-400 hover:to-emerald-600 text-white text-xl sm:text-2xl font-bold py-3 sm:py-4 rounded-xl sm:rounded-2xl border-b-4 border-emerald-900 active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center shadow-[0_4px_10px_rgba(16,185,129,0.3)] disabled:opacity-50 disabled:from-slate-700 disabled:to-slate-800 disabled:border-slate-900 disabled:text-slate-500 disabled:active:translate-y-0" disabled>OK</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- EKRAN WYNIKÓW -->
+        <div id="result-screen" class="hidden max-w-md w-full bg-slate-800/60 backdrop-blur-md rounded-3xl shadow-2xl p-8 text-center relative overflow-hidden border border-slate-700 z-10 no-print">
+            <i data-lucide="trophy" class="w-20 h-20 mx-auto text-yellow-400 mb-6 drop-shadow-[0_0_15px_rgba(250,204,21,0.6)]"></i>
+            <h2 id="t-missionComplete" class="text-3xl font-extrabold text-white mb-2">Misja Zakończona!</h2>
+            
+            <p class="text-lg text-indigo-200 mb-4">
+                <span id="t-yourScore">Twój wynik to</span> <span id="result-score" class="font-bold text-cyan-400 text-2xl">0</span> / <span id="max-score-display">15</span>
+            </p>
+
+            <div class="bg-black/40 rounded-2xl p-4 mb-6 border border-yellow-500/30 shadow-[inset_0_0_20px_rgba(250,204,21,0.1)]">
+                <p class="text-yellow-400 font-bold mb-1 flex justify-center items-center gap-2">
+                    <i data-lucide="coins" class="w-6 h-6"></i> 
+                    <span id="t-coinsEarned">Zarobione gwiezdne monety:</span> <span class="text-2xl text-yellow-300 drop-shadow-[0_0_5px_rgba(250,204,21,0.8)]">+<span id="result-coins">0</span></span>
+                </p>
+            </div>
+            
+            <div id="result-stars" class="flex justify-center flex-wrap gap-2 mb-8">
+                <!-- Gwiazdki renderowane w JS -->
+            </div>
+
+            <button onclick="showScreen('menu-screen')" class="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl font-bold text-lg hover:opacity-90 transition-opacity shadow-[0_0_15px_rgba(79,70,229,0.5)] active:scale-95 border border-indigo-400">
+                <span id="t-backToBase">Wróć do Bazy</span>
+            </button>
+        </div>
+
+        <!-- EKRAN CERTYFIKATU -->
+        <div id="certificate-screen" class="hidden max-w-md w-full bg-slate-800/80 backdrop-blur-md rounded-3xl shadow-2xl overflow-hidden border border-slate-700 z-10 no-print">
+            <div class="p-4 border-b border-slate-700 bg-slate-900/50 flex items-center">
+                <button onclick="showScreen('menu-screen')" class="p-2 text-indigo-300 hover:text-white hover:bg-slate-700 rounded-full transition-colors mr-2">
+                    <i data-lucide="arrow-left" class="w-6 h-6"></i>
+                </button>
+                <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                    <i data-lucide="scroll" class="text-yellow-400 w-5 h-5"></i> <span id="t-certCreator">Kreator Certyfikatu</span>
+                </h2>
+            </div>
+
+            <div class="p-6 space-y-5">
+                <p id="t-certInfo" class="text-indigo-200 text-sm">
+                    Wypełnij dane, aby wygenerować oficjalny Certyfikat Kosmicznej Matematyki z Twoją aktualną rangą i wynikiem!
+                </p>
+
+                <div class="space-y-4 text-left">
+                    <div>
+                        <label id="t-cadetName" class="block text-sm font-bold text-slate-300 mb-1">Imię i Nazwisko Kadeta (Dziecka):</label>
+                        <input id="input-student" type="text" class="w-full p-3 rounded-xl bg-slate-900/80 text-white border border-slate-600 focus:border-cyan-400 focus:outline-none focus:ring-1 focus:ring-cyan-400 placeholder-slate-500" placeholder="np. Jan Kowalski" />
+                    </div>
+                    <div>
+                        <label id="t-commanderName" class="block text-sm font-bold text-slate-300 mb-1">Dowódca misji (Nauczyciel/Rodzic):</label>
+                        <input id="input-teacher" type="text" class="w-full p-3 rounded-xl bg-slate-900/80 text-white border border-slate-600 focus:border-cyan-400 focus:outline-none focus:ring-1 focus:ring-cyan-400 placeholder-slate-500" placeholder="np. mgr Anna Nowak" />
+                    </div>
+                </div>
+
+                <div class="bg-slate-900/50 rounded-xl p-4 border border-slate-700">
+                    <p id="t-certData" class="text-xs text-slate-400 mb-2">Dane na dyplomie:</p>
+                    <div class="flex justify-between items-center mb-1">
+                        <span id="t-currentRank" class="text-slate-300 text-sm">Aktualna Ranga:</span>
+                        <span id="cert-rank-display" class="font-bold">Kadett</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span id="t-solvedTasks" class="text-slate-300 text-sm">Rozwiązanych zadań:</span>
+                        <span id="cert-solved-display" class="font-bold text-yellow-400">0</span>
+                    </div>
+                </div>
+
+                <button onclick="handlePrint()" class="w-full py-4 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-bold rounded-xl text-lg shadow-[0_0_15px_rgba(16,185,129,0.4)] transition-all active:scale-95 flex justify-center items-center gap-2 border border-emerald-400/50">
+                    <i data-lucide="printer" class="w-6 h-6"></i>
+                    <span id="t-printBtn">DRUKUJ CERTYFIKAT</span>
+                </button>
+                <p id="t-printTip" class="text-xs text-slate-400 text-center">W ustawieniach drukowania pamiętaj włączyć "Drukuj tła / Background graphics"!</p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- =========================================================
+         SZABLON DO DRUKU (CERTYFIKAT HTML)
+    ========================================================= -->
+    <div id="diploma-print-area" style="display: none;">
+        <img class="print-bg-img" src="https://images.unsplash.com/photo-1541185933-ef5d8ed016c2?auto=format&fit=crop&w=1200&q=80" alt="Space Rocket" />
+        <div class="print-bg-overlay"></div>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/e/e5/NASA_logo.svg" style="width: 120px; margin-bottom: 2rem; position: absolute; top: 50px; right: 50px; z-index: 20;" alt="NASA Logo" />
+
+        <div class="print-diploma-border">
+            <div style="text-align: center; margin-top: 2rem; width: 100%; position: relative; z-index: 10;">
+                <h1 id="p-certWord" class="print-title">CERTYFIKAT</h1>
+                <h2 id="p-certSub" class="print-subtitle">Kosmicznej Matematyki</h2>
+                
+                <p id="p-receives" class="print-text" style="margin-top: 1rem !important;">Otrzymuje:</p>
+                
+                <div id="p-student" style="font-family: 'Cinzel', serif !important; font-size: 3.5rem !important; font-weight: 900 !important; color: #f8fafc !important; margin: 0.5rem 0 1rem 0 !important; border-bottom: 2px solid #d4af37 !important; display: inline-block; padding: 0 2rem !important; min-width: 400px;">
+                    ........................................
+                </div>
+
+                <p id="p-achievedRank" class="print-text">Który(a) uzyskał(a) rangę:</p>
+                <div id="p-rank" class="print-rank-value">Kadett</div>
+                
+                <p id="p-solvedCorrectly" class="print-text">Rozwiązano poprawnie zadań:</p>
+                <div id="p-solved" class="print-solved-value">0</div>
+            </div>
+
+            <div class="print-footer">
+                <div style="text-align: left; width: 30%;">
+                    <p class="print-text" style="font-weight: 700; color: #cbd5e1 !important; margin: 0 !important; font-size: 0.9rem !important;">
+                        <span id="p-missionDate">Data misji:</span> <span id="p-date" style="color: #f8fafc !important;"></span>
+                    </p>
+                    <p id="p-congrats" class="print-text" style="font-size: 0.7rem !important; color: #64748b !important; text-transform: none !important; margin: 0.5rem 0 0 0 !important;">
+                        Gratulacje od Dowództwa Galaktyki!
+                    </p>
+                </div>
+                
+                <div style="text-align: center; width: 40%; display: flex; flex-direction: column; align-items: center; justify-content: flex-end;">
+                    <div style="margin-bottom: 1rem;">
+                        <svg style="width: 140px; height: 140px;" viewBox="0 0 100 100">
+                            <defs>
+                                <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#bf953f" />
+                                    <stop offset="25%" stop-color="#fcf6ba" />
+                                    <stop offset="50%" stop-color="#b38728" />
+                                    <stop offset="75%" stop-color="#fbf5b7" />
+                                    <stop offset="100%" stop-color="#aa771c" />
+                                </linearGradient>
+                            </defs>
+                            <path d="M50 0 L55 15 L70 10 L65 25 L80 25 L75 40 L90 45 L80 55 L90 65 L75 70 L80 85 L65 80 L70 95 L55 90 L50 100 L45 90 L30 95 L35 80 L20 85 L25 70 L10 65 L20 55 L10 45 L25 40 L20 25 L35 25 L30 10 L45 15 Z" fill="url(#goldGradient)" stroke="#fff" stroke-width="1.5" />
+                            <circle cx="50" cy="50" r="28" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="1.5" stroke-dasharray="3,2"/>
+                            <text x="50" y="55" font-family="'Cinzel', serif" font-size="10" font-weight="900" fill="#5a3c00" text-anchor="middle" letter-spacing="1">OFFICIAL</text>
+                            <text x="50" y="42" font-family="'Cinzel', serif" font-size="20" font-weight="bold" fill="#5a3c00" text-anchor="middle">★</text>
+                        </svg>
+                    </div>
+                    <div style="border-bottom: 1px solid #d4af37; width: 200px !important; margin-bottom: 0.5rem !important;"></div>
+                    <p id="p-commander" style="font-family: 'Montserrat', sans-serif !important; font-size: 0.75rem !important; color: #d4af37 !important; margin: 0 !important; text-transform: uppercase !important; letter-spacing: 1px !important; font-weight: 600 !important;">
+                        Dowódca misji:
+                    </p>
+                    <p id="p-teacher" style="font-family: 'Cinzel', serif !important; font-size: 1.1rem !important; color: #f8fafc !important; font-weight: 700 !important; margin: 0.5rem 0 0 0 !important;">
+                        ........................................
+                    </p>
+                </div>
+
+                <div style="text-align: right; width: 30%;">
+                    <div style="border-bottom: 1px solid #d4af37; width: 200px !important; margin-left: auto; margin-bottom: 0.5rem !important;"></div>
+                    <p id="p-author" style="font-family: 'Montserrat', sans-serif !important; font-size: 0.75rem !important; color: #d4af37 !important; margin: 0 !important; text-transform: uppercase !important; letter-spacing: 1px !important; font-weight: 600 !important;">
+                        Autor aplikacji:
+                    </p>
+                    <p style="font-family: 'Cinzel', serif !important; font-size: 1rem !important; color: #f8fafc !important; font-weight: 700 !important; margin: 0.5rem 0 0 0 !important;">
+                        Mirosław Józef "Miras"
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SKRYPTY APLIKACJI -->
+    <script>
+        // --- TŁUMACZENIA ---
+        const TRANSLATIONS = {
+            pl: {
+                appTitle: "Kosmiczna Matma", goal: "Cel", coins: "monet",
+                addTitle: "Start Rakiety", addDesc: "Dodawanie dużych liczb",
+                subTitle: "Błyskawica", subDesc: "Kosmiczne odejmowanie",
+                algTitle: "Sygnał X", algDesc: "Znajdź nieznaną wartość",
+                seqTitle: "Orbity i Ciągi", seqDesc: "Odkryj galaktyczną regułę",
+                certBtn: "Generuj Certyfikat", missionComplete: "Misja Zakończona!",
+                yourScore: "Twój wynik to", coinsEarned: "Zarobione gwiezdne monety:",
+                backToBase: "Wróć do Bazy", great: "Świetnie!", correctWas: "Prawidłowo:",
+                comboBroken: "Seria przerwana :(", certCreator: "Kreator Certyfikatu",
+                certInfo: "Wypełnij dane, aby wygenerować oficjalny Certyfikat Kosmicznej Matematyki z Twoją aktualną rangą i wynikiem!",
+                cadetName: "Imię i Nazwisko Kadeta (Dziecka):", placeholderStudent: "np. Jan Kowalski",
+                commanderName: "Dowódca misji (Nauczyciel/Rodzic):", placeholderTeacher: "np. mgr Anna Nowak",
+                certData: "Dane na dyplomie:", currentRank: "Aktualna Ranga:", solvedTasks: "Rozwiązanych zadań:",
+                printBtn: "DRUKUJ CERTYFIKAT", printTip: 'W ustawieniach drukowania pamiętaj włączyć "Drukuj tła / Background graphics"!',
+                certWord: "CERTYFIKAT", certSub: "Kosmicznej Matematyki", receives: "Otrzymuje:",
+                achievedRank: "Który(a) uzyskał(a) rangę:", solvedCorrectly: "Rozwiązano poprawnie zadań:",
+                missionDate: "Data misji:", congrats: "Gratulacje od Dowództwa Galaktyki!",
+                commander: "Dowódca misji:", author: "Autor aplikacji:",
+                expAdd: "Pamiętaj o dodawaniu jedności do jedności, dziesiątek do dziesiątek...",
+                expSub: "Jeśli brakuje Ci na górze, \"pożycz\" z rzędu obok!",
+                expAlg: "Znajdź brakujący element galaktycznej układanki (X).",
+                expSeq: "Jaka kosmiczna reguła tutaj działa?", ruleDouble: "Podwój",
+                rank1: "Kosmiczny Kadet", rank2: "Odkrywca Planet", rank3: "Kapitan Galaktyki",
+                rank4: "Mistrz Grawitacji", rank5: "Strażnik Wszechświata",
+                diffEasy: "Łatwy", diffMed: "Średni", diffHard: "Trudny"
+            },
+            is: {
+                appTitle: "Geimstærðfræði", goal: "Markmið", coins: "mynt",
+                addTitle: "Eldflaugaskot", addDesc: "Samlagning stórra talna",
+                subTitle: "Elding", subDesc: "Geimfrádráttur",
+                algTitle: "Merki X", algDesc: "Finndu óþekkt gildi",
+                seqTitle: "Sporbrautir & Raðir", seqDesc: "Uppgötvaðu vetrarbrautarregluna",
+                certBtn: "Búa til Skírteini", missionComplete: "Leiðangri Lokið!",
+                yourScore: "Þín einkunn er", coinsEarned: "Áunnin stjörnumynt:",
+                backToBase: "Aftur í Bækistöð", great: "Frábært!", correctWas: "Rétt svar:",
+                comboBroken: "Röð rofin :(", certCreator: "Skírteinisgerð",
+                certInfo: "Fylltu út gögnin til að búa til opinbert skírteini í Geimstærðfræði með núverandi stöðu og árangri!",
+                cadetName: "Nafn Kadetts (Barnsins):", placeholderStudent: "t.d. Jón Jónsson",
+                commanderName: "Leiðangursstjóri (Kennari/Foreldri):", placeholderTeacher: "t.d. Anna Jónsdóttir",
+                certData: "Gögn á prófskírteini:", currentRank: "Núverandi Staða:", solvedTasks: "Leyst verkefni:",
+                printBtn: "PRENTA SKÍRTEINI", printTip: 'Í prentstillingum, mundu að kveikja á "Prenta bakgrunn / Background graphics"!',
+                certWord: "SKÍRTEINI", certSub: "Í Geimstærðfræði", receives: "Veitist:",
+                achievedRank: "Fyrir að ná stöðunni:", solvedCorrectly: "Fjöldi réttra svara:",
+                missionDate: "Dagsetning:", congrats: "Til hamingju frá Geimstjórn!",
+                commander: "Leiðangursstjóri:", author: "Höfundur forrits:",
+                expAdd: "Mundu að leggja saman einingar við einingar, tugi við tugi...",
+                expSub: "Ef þig vantar ofan á, fáðu lánað úr næsta dálki!",
+                expAlg: "Finndu það sem vantar í geimpúslið (X).",
+                expSeq: "Hvaða geimregla á við hér?", ruleDouble: "Tvöfalda",
+                rank1: "Geimkadett", rank2: "Reikistjörnukönnuður", rank3: "Vetrarbrautarkapteinn",
+                rank4: "Þyngdaraflsmeistari", rank5: "Vörður Alheimsins",
+                diffEasy: "Auðvelt", diffMed: "Miðlungs", diffHard: "Erfitt"
+            },
+            en: {
+                appTitle: "Space Math", goal: "Goal", coins: "coins",
+                addTitle: "Rocket Launch", addDesc: "Addition of large numbers",
+                subTitle: "Lightning", subDesc: "Space subtraction",
+                algTitle: "Signal X", algDesc: "Find the unknown value",
+                seqTitle: "Orbits & Sequences", seqDesc: "Discover the galactic rule",
+                certBtn: "Generate Certificate", missionComplete: "Mission Complete!",
+                yourScore: "Your score is", coinsEarned: "Star coins earned:",
+                backToBase: "Return to Base", great: "Great!", correctWas: "Correct:",
+                comboBroken: "Combo broken :(", certCreator: "Certificate Maker",
+                certInfo: "Fill in the details to generate an official Space Math Certificate with your current rank and score!",
+                cadetName: "Cadet's Name (Child):", placeholderStudent: "e.g. John Doe",
+                commanderName: "Mission Commander (Teacher/Parent):", placeholderTeacher: "e.g. Mr. Smith",
+                certData: "Diploma data:", currentRank: "Current Rank:", solvedTasks: "Solved tasks:",
+                printBtn: "PRINT CERTIFICATE", printTip: 'In print settings, remember to enable "Print backgrounds / Background graphics"!',
+                certWord: "CERTIFICATE", certSub: "Of Space Mathematics", receives: "Awarded to:",
+                achievedRank: "Who achieved the rank:", solvedCorrectly: "Correctly solved tasks:",
+                missionDate: "Mission date:", congrats: "Congratulations from Space Command!",
+                commander: "Mission Commander:", author: "App author:",
+                expAdd: "Remember to add ones to ones, tens to tens...",
+                expSub: "If you lack on top, \"borrow\" from the next column!",
+                expAlg: "Find the missing piece of the galactic puzzle (X).",
+                expSeq: "What space rule applies here?", ruleDouble: "Double",
+                rank1: "Space Cadet", rank2: "Planet Explorer", rank3: "Galaxy Captain",
+                rank4: "Gravity Master", rank5: "Guardian of the Universe",
+                diffEasy: "Easy", diffMed: "Medium", diffHard: "Hard"
+            }
+        };
+
+        // --- ZMIENNE STANU ---
+        let lang = localStorage.getItem('spaceMathLang') || 'pl';
+        let totalCoins = parseInt(localStorage.getItem('spaceMathCoins') || '0', 10);
+        let totalSolved = parseInt(localStorage.getItem('spaceMathSolved') || '0', 10);
+        let gameMode = null;
+        let score = 0;
+        let questionCount = 0;
+        let currentQuestion = null;
+        let userAnswer = '';
+        let feedback = null;
+        let sessionCoins = 0;
+        let combo = 0;
+        let earnedJustNow = 0;
+        const maxQuestions = 15; // Gra trwa teraz 15 rund!
+        let currentDifficulty = parseInt(localStorage.getItem('spaceMathDiff') || '2', 10);
+
+        // --- FUNKCJE POMOCNICZE ---
+        const getRankInfo = (coins, t) => {
+            if (coins < 100) return { title: t.rank1, nextAt: 100, colorClass: 'text-slate-400', icon: 'rocket' };
+            if (coins < 300) return { title: t.rank2, nextAt: 300, colorClass: 'text-emerald-400', icon: 'radar' };
+            if (coins < 600) return { title: t.rank3, nextAt: 600, colorClass: 'text-cyan-400', icon: 'star' };
+            if (coins < 1000) return { title: t.rank4, nextAt: 1000, colorClass: 'text-fuchsia-400', icon: 'orbit' };
+            return { title: t.rank5, nextAt: null, colorClass: 'text-yellow-400', icon: 'crown' };
+        };
+
+        function el(id) { return document.getElementById(id); }
+
+        function setLang(newLang) {
+            lang = newLang;
+            localStorage.setItem('spaceMathLang', lang);
+            
+            // Styl flag
+            ['pl', 'is', 'en'].forEach(l => {
+                const btn = el(`flag-${l}`);
+                if(l === lang) {
+                    btn.classList.add('border-cyan-400', 'scale-110', 'shadow-[0_0_15px_rgba(34,211,238,0.8)]', 'opacity-100');
+                    btn.classList.remove('border-transparent', 'opacity-50');
+                } else {
+                    btn.classList.remove('border-cyan-400', 'scale-110', 'shadow-[0_0_15px_rgba(34,211,238,0.8)]', 'opacity-100');
+                    btn.classList.add('border-transparent', 'opacity-50');
+                }
+            });
+
+            const t = TRANSLATIONS[lang];
+            
+            // Aktualizacja tekstów
+            const texts = ['appTitle', 'addTitle', 'addDesc', 'subTitle', 'subDesc', 'algTitle', 'algDesc', 
+                           'seqTitle', 'seqDesc', 'certBtn', 'author', 'missionComplete', 'yourScore', 'coinsEarned', 
+                           'backToBase', 'certCreator', 'certInfo', 'cadetName', 'commanderName', 'certData', 
+                           'currentRank', 'solvedTasks', 'printBtn', 'printTip', 'great', 'correctWas', 'comboBroken',
+                           'certWord', 'certSub', 'receives', 'achievedRank', 'solvedCorrectly', 'missionDate', 
+                           'congrats', 'commander', 'diffEasy', 'diffMed', 'diffHard'];
+            
+            texts.forEach(key => {
+                if(el(`t-${key}`)) el(`t-${key}`).innerText = t[key];
+                if(el(`p-${key}`)) el(`p-${key}`).innerText = t[key]; // Print cert
+            });
+
+            el('input-student').placeholder = t.placeholderStudent;
+            el('input-teacher').placeholder = t.placeholderTeacher;
+
+            updateMenuUI();
+        }
+
+        // --- ANIMACJA GWIAZD ---
+        function renderStars(speedLevel = 0) {
+            const container = el('starfield');
+            container.innerHTML = '';
+            
+            // Płynne skalowanie prędkości aż do 15 punktów
+            const effectiveSpeed = Math.min(speedLevel, 15);
+            const speedMultiplier = 1 + (effectiveSpeed * 0.35); // Przy 15 pkt prędkość wynosi ok 6x normy
+            const stretch = effectiveSpeed > 0 ? effectiveSpeed * 6 : 0; 
+
+            for(let i=0; i<100; i++) {
+                const angle = Math.random() * 360;
+                const distance = Math.random() * 100 + 50;
+                const size = Math.random() * 2 + 1;
+                const delay = Math.random() * -10;
+                const baseDuration = Math.random() * 4 + 3;
+                const opacity = Math.random() * 0.8 + 0.2;
+                const currentDuration = baseDuration / speedMultiplier;
+
+                const wrapper = document.createElement('div');
+                wrapper.className = 'absolute top-1/2 left-1/2';
+                wrapper.style.transform = `translate(-50%, -50%) rotate(${angle}deg)`;
+
+                const star = document.createElement('div');
+                star.className = 'bg-white rounded-full shadow-[0_0_8px_rgba(255,255,255,0.8)]';
+                star.style.width = `${size}px`;
+                star.style.height = `${size + stretch}px`;
+                star.style.setProperty('--star-opacity', opacity);
+                star.style.setProperty('--star-distance', `${distance}vmax`);
+                star.style.animationName = 'fly-out';
+                star.style.animationDuration = `${currentDuration}s`;
+                star.style.animationTimingFunction = 'ease-in';
+                star.style.animationIterationCount = 'infinite';
+                star.style.animationDelay = `${delay}s`;
+
+                wrapper.appendChild(star);
+                container.appendChild(wrapper);
+            }
+        }
+
+        // --- UI UPDATES ---
+        function setDifficulty(level) {
+            currentDifficulty = level;
+            localStorage.setItem('spaceMathDiff', currentDifficulty);
+            updateMenuUI();
+        }
+
+        function updateMenuUI() {
+            const t = TRANSLATIONS[lang];
+            const rankInfo = getRankInfo(totalCoins, t);
+            
+            el('menu-total-coins').innerText = totalCoins;
+            el('menu-rank-title').innerText = rankInfo.title;
+            
+            el('menu-rank-icon-container').className = `p-1.5 rounded-full bg-slate-800 border border-slate-600 shadow-[0_0_10px_rgba(255,255,255,0.1)] ${rankInfo.colorClass}`;
+            el('menu-rank-icon').setAttribute('data-lucide', rankInfo.icon);
+            
+            // Certyfikat pre-fill
+            el('cert-rank-display').innerText = rankInfo.title;
+            el('cert-rank-display').className = `font-bold ${rankInfo.colorClass}`;
+            el('cert-solved-display').innerText = totalSolved;
+            el('p-rank').innerText = rankInfo.title;
+            el('p-solved').innerText = totalSolved;
+
+            if (rankInfo.nextAt) {
+                el('progress-container').style.display = 'block';
+                const pct = Math.min(100, Math.round((totalCoins / rankInfo.nextAt) * 100));
+                el('t-goal-text').innerText = `${t.goal}: ${rankInfo.nextAt} ${t.coins}`;
+                el('menu-progress-pct').innerText = `${pct}%`;
+                el('menu-progress-bar').style.width = `${pct}%`;
+            } else {
+                el('progress-container').style.display = 'none';
+            }
+
+            // Aktualizacja przycisków trudności
+            [1, 2, 3].forEach(lvl => {
+                const btn = el(`btn-diff-${lvl}`);
+                if (btn) {
+                    if (lvl === currentDifficulty) {
+                        btn.classList.remove('opacity-50', 'border-transparent');
+                        btn.classList.add('bg-slate-700/80', 'border', 'border-slate-600', 'shadow-[0_0_10px_rgba(255,255,255,0.1)]', 'text-white');
+                        btn.style.opacity = '1';
+                    } else {
+                        btn.classList.add('opacity-50', 'border-transparent');
+                        btn.classList.remove('bg-slate-700/80', 'border', 'border-slate-600', 'shadow-[0_0_10px_rgba(255,255,255,0.1)]', 'text-white');
+                    }
+                }
+            });
+
+            lucide.createIcons();
+        }
+
+        function showScreen(screenId) {
+            ['menu-screen', 'game-screen', 'result-screen', 'certificate-screen'].forEach(id => {
+                el(id).classList.add('hidden');
+            });
+            el(screenId).classList.remove('hidden');
+            
+            if(screenId === 'menu-screen' || screenId === 'certificate-screen' || screenId === 'result-screen') {
+                renderStars(0);
+                updateMenuUI();
+            }
+        }
+
+        // --- GENERATORY ZADAŃ ---
+        function generateAddition(t, diff) {
+            let min = 10, max = 50;
+            if(diff === 2) { min = 100; max = 300; }
+            if(diff === 3) { min = 300; max = 999; }
+            const a = Math.floor(Math.random() * (max - min)) + min;
+            const b = Math.floor(Math.random() * (max - min)) + min;
+            return { type: 'column', a, b, operator: '+', answer: a + b, explanation: t.expAdd };
+        }
+
+        function generateSubtraction(t, diff) {
+            let minA = 20, maxA = 50, minB = 5, maxB = 20;
+            if(diff === 2) { minA = 100; maxA = 300; minB = 50; maxB = 150; }
+            if(diff === 3) { minA = 500; maxA = 999; minB = 100; maxB = 800; }
+            let a = Math.floor(Math.random() * (maxA - minA)) + minA;
+            let b = Math.floor(Math.random() * (maxB - minB)) + minB;
+            if (b > a) { let temp = a; a = b; b = temp; }
+            return { type: 'column', a, b, operator: '-', answer: a - b, explanation: t.expSub };
+        }
+
+        function generateAlgebra(t, diff) {
+            const types = ['x+a=b', 'a+x=b', 'x-a=b'];
+            const type = types[Math.floor(Math.random() * types.length)];
+            let min = 2, max = 10;
+            if(diff === 2) { min = 5; max = 25; }
+            if(diff === 3) { min = 15; max = 80; }
+            const a = Math.floor(Math.random() * (max - min)) + min;
+            const ans = Math.floor(Math.random() * (max - min)) + min; 
+            let qText = '', b = 0;
+            if (type === 'x+a=b') { b = ans + a; qText = `X + ${a} = ${b}`; }
+            else if (type === 'a+x=b') { b = a + ans; qText = `${a} + X = ${b}`; }
+            else { b = ans - a; qText = `X - ${a} = ${b}`; }
+            return { type: 'inline', questionText: qText, answer: ans, explanation: t.expAlg };
+        }
+
+        function generateSequence(t, diff) {
+            let minStart = 2, maxStart = 10;
+            let rules = [
+                { name: '+1', op: (x) => x + 1 }, { name: '+2', op: (x) => x + 2 }, { name: '-1', op: (x) => x - 1 }
+            ];
+            
+            if(diff === 2) {
+                minStart = 10; maxStart = 30;
+                rules = [
+                    { name: '+2', op: (x) => x + 2 }, { name: '+5', op: (x) => x + 5 },
+                    { name: '-3', op: (x) => x - 3 }, { name: t.ruleDouble, op: (x) => x * 2 }
+                ];
+            }
+            if(diff === 3) {
+                minStart = 20; maxStart = 100;
+                rules = [
+                    { name: '+12', op: (x) => x + 12 }, { name: '+15', op: (x) => x + 15 },
+                    { name: '-8', op: (x) => x - 8 }, { name: '*3', op: (x) => x * 3 }
+                ];
+            }
+
+            const start = Math.floor(Math.random() * (maxStart - minStart)) + minStart;
+            const rule = rules[Math.floor(Math.random() * rules.length)];
+            const seq = [start, rule.op(start), rule.op(rule.op(start))];
+            return { 
+                type: 'inline', 
+                questionText: `${seq[0]} ➔ ${seq[1]} ➔ ${seq[2]} ➔ ?`, 
+                answer: rule.op(rule.op(rule.op(start))), 
+                explanation: `${t.expSeq} (${rule.name})` 
+            };
+        }
+
+        // --- GRA ---
+        function startGame(mode) {
+            gameMode = mode;
+            score = 0;
+            questionCount = 0;
+            userAnswer = '';
+            feedback = null;
+            combo = 0;
+            sessionCoins = 0;
+            nextQuestion(mode);
+            showScreen('game-screen');
+        }
+
+        function nextQuestion(mode = gameMode) {
+            userAnswer = '';
+            feedback = null;
+            earnedJustNow = 0;
+            const t = TRANSLATIONS[lang];
+            
+            if (mode === 'add') currentQuestion = generateAddition(t, currentDifficulty);
+            if (mode === 'sub') currentQuestion = generateSubtraction(t, currentDifficulty);
+            if (mode === 'algebra') currentQuestion = generateAlgebra(t, currentDifficulty);
+            if (mode === 'sequence') currentQuestion = generateSequence(t, currentDifficulty);
+
+            renderGameUI();
+            renderStars(score);
+        }
+
+        function renderGameUI() {
+            // Header stats
+            el('game-session-coins').innerText = sessionCoins;
+            el('game-progress-bar').style.width = `${(questionCount / maxQuestions) * 100}%`;
+            
+            if(combo >= 2) {
+                el('combo-container').classList.remove('hidden');
+                el('combo-value').innerText = combo;
+            } else {
+                el('combo-container').classList.add('hidden');
+            }
+
+            // Obszar pytania
+            const qCont = el('question-container');
+            const opacityClass = feedback ? 'opacity-50' : 'opacity-100';
+            const pulseClass = feedback ? '' : 'animate-pulse';
+            const displayAns = userAnswer || (feedback ? currentQuestion.answer : '&nbsp;');
+
+            let html = '';
+            if (currentQuestion.type === 'column') {
+                html = `
+                <div class="inline-flex flex-col text-right font-mono text-5xl sm:text-6xl font-bold text-white leading-none transition-opacity duration-300 ${opacityClass}">
+                    <div class="pr-2 tracking-[0.15em] mb-1.5 drop-shadow-[0_0_5px_rgba(255,255,255,0.3)]">${currentQuestion.a}</div>
+                    <div class="flex justify-between items-end mb-1.5">
+                        <span class="pr-4 sm:pr-6 text-4xl sm:text-5xl text-indigo-400">${currentQuestion.operator}</span>
+                        <span class="pr-2 tracking-[0.15em] drop-shadow-[0_0_5px_rgba(255,255,255,0.3)]">${currentQuestion.b}</span>
+                    </div>
+                    <div class="border-b-4 sm:border-b-8 border-indigo-500/70 my-1.5 rounded-full shrink-0 shadow-[0_2px_10px_rgba(99,102,241,0.5)]"></div>
+                    <div class="pr-2 tracking-[0.15em] min-h-[1em] mt-1.5 text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.5)] ${pulseClass}">
+                        ${displayAns}
+                    </div>
+                </div>`;
+            } else {
+                const textNoQ = currentQuestion.questionText.replace('?', '');
+                html = `
+                <h2 class="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white tracking-wider text-center w-full break-words px-4 transition-opacity duration-300 drop-shadow-[0_0_8px_rgba(255,255,255,0.2)] ${opacityClass}">
+                    ${textNoQ}
+                    <span class="inline-block min-w-[60px] sm:min-w-[80px] border-b-4 border-indigo-500/70 ml-2 text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.5)] ${pulseClass}">
+                        ${displayAns}
+                    </span>
+                </h2>`;
+            }
+            qCont.innerHTML = html;
+            el('question-explanation').innerText = currentQuestion.explanation;
+
+            // Przyciski
+            const btns = document.querySelectorAll('.numpad-btn');
+            btns.forEach(btn => {
+                btn.disabled = feedback !== null;
+            });
+            el('submit-btn').disabled = (feedback !== null || userAnswer === '');
+
+            lucide.createIcons(); // Re-init icons just in case
+        }
+
+        function handleNumpad(num) {
+            if (feedback) return;
+            if (userAnswer.length < 4) {
+                userAnswer += num.toString();
+                renderGameUI();
+            }
+        }
+
+        function handleBackspace() {
+            if (feedback) return;
+            userAnswer = userAnswer.slice(0, -1);
+            renderGameUI();
+        }
+
+        function checkAnswer() {
+            if (!userAnswer) return;
+            
+            const isCorrect = parseInt(userAnswer) === currentQuestion.answer;
+            
+            if (isCorrect) {
+                const comboBonus = combo >= 2 ? 5 : 0;
+                earnedJustNow = (currentDifficulty * 5) + comboBonus;
+                
+                sessionCoins += earnedJustNow;
+                totalCoins += earnedJustNow;
+                totalSolved += 1;
+                
+                localStorage.setItem('spaceMathCoins', totalCoins.toString());
+                localStorage.setItem('spaceMathSolved', totalSolved.toString());
+                
+                feedback = 'correct';
+                score += 1;
+                combo += 1;
+                
+                el('earned-just-now').innerText = earnedJustNow;
+                el('feedback-correct').classList.remove('hidden');
+                
+            } else {
+                feedback = 'incorrect';
+                combo = 0;
+                
+                el('correct-answer-display').innerText = currentQuestion.answer;
+                el('feedback-incorrect').classList.remove('hidden');
+                if(combo > 0) el('combo-broken-msg').classList.remove('hidden');
+            }
+
+            renderGameUI();
+
+            setTimeout(() => {
+                el('feedback-correct').classList.add('hidden');
+                el('feedback-incorrect').classList.add('hidden');
+                el('combo-broken-msg').classList.add('hidden');
+
+                if (questionCount + 1 >= maxQuestions) {
+                    finishGame();
+                } else {
+                    questionCount++;
+                    nextQuestion();
+                }
+            }, 1800);
+        }
+
+        function finishGame() {
+            el('result-score').innerText = score;
+            el('max-score-display').innerText = maxQuestions;
+            el('result-coins').innerText = sessionCoins;
+            
+            const starsCont = el('result-stars');
+            starsCont.innerHTML = '';
+            for(let i=0; i<maxQuestions; i++) {
+                const isEarned = i < score;
+                const animClass = isEarned ? 'animate-bounce drop-shadow-[0_0_8px_rgba(250,204,21,0.8)]' : '';
+                const colorClass = isEarned ? 'text-yellow-400 fill-yellow-400' : 'text-slate-700';
+                const delay = isEarned ? `animation-delay: ${i*100}ms;` : '';
+                
+                starsCont.innerHTML += `<i data-lucide="star" class="w-8 h-8 ${colorClass} ${animClass}" style="${delay}"></i>`;
+            }
+            showScreen('result-screen');
+            lucide.createIcons();
+        }
+
+        // --- DRUKOWANIE ---
+        function handlePrint() {
+            let uczen = el('input-student').value.trim();
+            let nauczyciel = el('input-teacher').value.trim();
+
+            if (uczen === "") uczen = "........................................";
+            if (nauczyciel === "") nauczyciel = "........................................";
+
+            el('p-student').innerText = uczen;
+            el('p-teacher').innerText = nauczyciel;
+            
+            // Formatowanie daty na podstawie wybranego języka
+            let locale = lang === 'is' ? 'is-IS' : (lang === 'en' ? 'en-US' : 'pl-PL');
+            el('p-date').innerText = new Date().toLocaleDateString(locale);
+
+            const printArea = el('diploma-print-area');
+            printArea.style.display = 'block';
+            window.print();
+            printArea.style.display = 'none';
+        }
+
+        // --- INIT ---
+        document.addEventListener('DOMContentLoaded', () => {
+            setLang(lang); // Ustawia język z localStorage i odpala UI
+            renderStars(0);
+            lucide.createIcons();
+        });
+
+    </script>
+</body>
+</html>

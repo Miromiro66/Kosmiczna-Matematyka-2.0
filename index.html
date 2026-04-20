@@ -76,7 +76,7 @@
             <p id="t-resetConfirmDesc" class="text-slate-400 text-sm mb-6">Wszystkie monety i postępy zostaną utracone. Czy kontynuować?</p>
             <div class="flex gap-3">
                 <button onclick="closeResetModal()" class="flex-1 py-3 bg-slate-800 hover:bg-slate-700 rounded-xl font-bold transition-all"><span id="t-resetNo">Nie</span></button>
-                <button id="reset-confirm-btn" class="flex-1 py-3 bg-red-600 hover:bg-red-500 text-white rounded-xl font-bold transition-all shadow-lg shadow-red-900/40"><span id="t-resetYes">Tak</span></button>
+                <button id="reset-confirm-btn" onclick="resetProgress()" class="flex-1 py-3 bg-red-600 hover:bg-red-500 text-white rounded-xl font-bold transition-all shadow-lg shadow-red-900/40"><span id="t-resetYes">Tak</span></button>
             </div>
         </div>
     </div>
@@ -196,7 +196,7 @@
                     <i data-lucide="flame" class="w-4 h-4 mr-1 fill-orange-500"></i>Combo x<span id="combo-value">2</span>!
                 </div>
                 
-                <div className="flex gap-4 items-center">
+                <div class="flex gap-4 items-center">
                     <div class="flex items-center text-yellow-400 font-bold bg-black/40 px-3 py-1 rounded-full border border-yellow-500/30 shadow-[0_0_8px_rgba(250,204,21,0.2)]">
                         <i data-lucide="coins" class="w-4 h-4 mr-1"></i><span id="game-session-coins">0</span>
                     </div>
@@ -446,8 +446,7 @@
                 solvedCorrectly: "Correctly solved tasks:", missionDate: "Mission date:",
                 congrats: "Congratulations from Space Command!", commander: "Mission Commander:",
                 author: "App author:",
-                expAdd: "Remember to add ones to ones, tens to tens...",
-                expSub: "If you lack on top, \"borrow\" from the next column!",
+                expAdd: "Start adding from the right!", expSub: "Borrow if you lack on top!",
                 expAlg: "Find the missing piece of the galactic puzzle (X).",
                 expSeq: "What space rule applies here?",
                 expChain: "Remember the order of operations! Multiplication first, then addition and subtraction.",

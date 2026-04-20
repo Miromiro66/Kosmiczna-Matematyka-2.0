@@ -1,1177 +1,1464 @@
-<!DOCTYPE html>
-<html lang="pl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Kosmiczna Matematyka</title>
-    
-    <!-- Czcionki Google -->
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Tailwind CSS (wersja CDN do pojedynczego pliku) -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Ikony Lucide -->
-    <script src="https://unpkg.com/lucide@latest"></script>
+import React, { useState, useEffect } from 'react';
+import { 
+  Star, 
+  Rocket, 
+  Zap, 
+  Radar, 
+  Orbit, 
+  ArrowLeft, 
+  Check, 
+  X as XIcon,
+  Trophy,
+  Coins,
+  Flame,
+  Award,
+  Crown,
+  Sparkles,
+  Printer,
+  Scroll,
+  ArrowDown,
+  Lightbulb,
+  Cpu
+} from 'lucide-react';
 
-    <style>
-        /* Animacja gwiazd (Warp Speed) */
+// --- TŁUMACZENIA (PL, IS, EN) ---
+const TRANSLATIONS = {
+  pl: {
+    appTitle: "Kosmiczna Matma",
+    goal: "Cel",
+    coins: "monet",
+    addTitle: "Start Rakiety",
+    addDesc: "Dodawanie dużych liczb",
+    subTitle: "Błyskawica",
+    subDesc: "Kosmiczne odejmowanie",
+    algTitle: "Sygnał X",
+    algDesc: "Znajdź nieznaną wartość",
+    seqTitle: "Orbity i Ciągi",
+    seqDesc: "Odkryj galaktyczną regułę",
+    chainTitle: "Kwantowy Komputer",
+    chainDesc: "Łańcuchy działań",
+    certBtn: "Generuj Certyfikat",
+    missionComplete: "Misja Zakończona!",
+    yourScore: "Twój wynik to",
+    coinsEarned: "Zarobione gwiezdne monety:",
+    backToBase: "Wróć do Bazy",
+    great: "Świetnie!",
+    correctWas: "Prawidłowo:",
+    comboBroken: "Seria przerwana :(",
+    certCreator: "Kreator Certyfikatu",
+    certInfo: "Wypełnij dane, aby wygenerować oficjalny Certyfikat Kosmicznej Matematyki z Twoją aktualną rangą i wynikiem!",
+    cadetName: "Imię i Nazwisko Kadeta (Dziecka):",
+    placeholderStudent: "np. Jan Kowalski",
+    commanderName: "Dowódca misji (Nauczyciel/Rodzic):",
+    placeholderTeacher: "np. mgr Anna Nowak",
+    certData: "Dane na dyplomie:",
+    currentRank: "Aktualna Ranga:",
+    solvedTasks: "Rozwiązanych zadań:",
+    printBtn: "DRUKUJ CERTYFIKAT",
+    printTip: 'W ustawieniach drukowania pamiętaj włączyć "Drukuj tła / Background graphics"!',
+    certWord: "CERTYFIKAT",
+    certSub: "Kosmicznej Matematyki",
+    receives: "Otrzymuje:",
+    achievedRank: "Który(a) uzyskał(a) rangę:",
+    solvedCorrectly: "Rozwiązano poprawnie zadań:",
+    missionDate: "Data misji:",
+    congrats: "Gratulacje od Dowództwa Galaktyki!",
+    commander: "Dowódca misji:",
+    author: "Autor aplikacji:",
+    expAdd: "Pamiętaj o dodawaniu jedności do jedności, dziesiątek do dziesiątek...",
+    expSub: "Jeśli brakuje Ci na górze, \"pożycz\" z rzędu obok!",
+    expAlg: "Znajdź brakujący element galaktycznej układanki (X).",
+    expSeq: "Jaka kosmiczna reguła tutaj działa?",
+    expChain: "Pamiętaj o kolejności wykonywania działań! Najpierw mnożenie, potem dodawanie i odejmowanie.",
+    ruleDouble: "Podwój",
+    rank1: "Kosmiczny Kadet",
+    rank2: "Odkrywca Planet",
+    rank3: "Kapitan Galaktyki",
+    rank4: "Mistrz Grawitacji",
+    rank5: "Strażnik Wszechświata",
+    diffEasy: "Łatwy",
+    diffMed: "Średni",
+    diffHard: "Trudny",
+    catAdd: "Dodawanie",
+    catSub: "Odejmowanie",
+    catAlg: "Algebra (X)",
+    catSeq: "Ciągi",
+    catChain: "Łańcuchy",
+    selectPilot: "WYBIERZ PILOTA",
+    emptyName: "Wpisz imię...",
+    pilot: "PILOT",
+    addPilot: "DODAJ PILOTA",
+    resetConfirmTitle: "Czy na pewno?",
+    resetConfirmDesc: "To działanie jest nieodwracalne. Czy kontynuować?",
+    resetYes: "Tak",
+    resetNo: "Nie",
+    showHint: "Pokaż podpowiedź"
+  },
+  is: {
+    appTitle: "Geimstærðfræði",
+    goal: "Markmið",
+    coins: "mynt",
+    addTitle: "Eldflaugaskot",
+    addDesc: "Samlagning stórra talna",
+    subTitle: "Elding",
+    subDesc: "Geimfrádráttur",
+    algTitle: "Merki X",
+    algDesc: "Finndu óþekkt gildi",
+    seqTitle: "Sporbrautir & Raðir",
+    seqDesc: "Uppgötvaðu vetrarbrautarregluna",
+    chainTitle: "Skammtatölva",
+    chainDesc: "Aðgerðakeðjur",
+    certBtn: "Búa til Skírteini",
+    missionComplete: "Leiðangri Lokið!",
+    yourScore: "Þín einkunn er",
+    coinsEarned: "Áunnin stjörnumynt:",
+    backToBase: "Aftur í Bækistöð",
+    great: "Frábært!",
+    correctWas: "Rétt svar:",
+    comboBroken: "Röð rofin :(",
+    certCreator: "Skírteinisgerð",
+    certInfo: "Fylltu út gögnin til að búa til opinbert skírteini í Geimstærðfræði með núverandi stöðu og árangri!",
+    cadetName: "Nafn Kadetts (Barnsins):",
+    placeholderStudent: "t.d. Jón Jónsson",
+    commanderName: "Leiðangursstjóri (Kennari/Foreldri):",
+    placeholderTeacher: "t.d. Anna Jónsdóttir",
+    certData: "Gögn á prófskírteini:",
+    currentRank: "Núverandi Staða:",
+    solvedTasks: "Leyst verkefni:",
+    printBtn: "PRENTA SKÍRTEINI",
+    printTip: 'Í prentstillingum, mundu að kveikja á "Prenta bakgrunn / Background graphics"!',
+    certWord: "SKÍRTEINI",
+    certSub: "Í Geimstærðfræði",
+    receives: "Veitist:",
+    achievedRank: "Fyrir að ná stöðunni:",
+    solvedCorrectly: "Fjöldi réttra svara:",
+    missionDate: "Dagsetning:",
+    congrats: "Til hamingju frá Geimstjórn!",
+    commander: "Leiðangursstjóri:",
+    author: "Höfundur forrits:",
+    expAdd: "Mundu að leggja saman einingar við einingar, tugi við tugi...",
+    expSub: "Ef þig vantar ofan á, fáðu lánað úr næsta dálki!",
+    expAlg: "Finndu það sem vantar í geimpúslið (X).",
+    expSeq: "Hvaða geimregla á við hér?",
+    expChain: "Mundu eftir röð aðgerða! Margföldun fyrst, síðan samlagning og frádráttur.",
+    ruleDouble: "Tvöfalda",
+    rank1: "Geimkadett",
+    rank2: "Reikistjörnukönnuður",
+    rank3: "Vetrarbrautarkapteinn",
+    rank4: "Þyngdaraflsmeistari",
+    rank5: "Vörður Alheimsins",
+    diffEasy: "Auðvelt",
+    diffMed: "Miðlungs",
+    diffHard: "Erfitt",
+    catAdd: "Samlagning",
+    catSub: "Frádráttur",
+    catAlg: "Algebru (X)",
+    catSeq: "Raðir",
+    catChain: "Keðjur",
+    selectPilot: "VELDU FLUGMANN",
+    emptyName: "Skrifaðu nafn...",
+    pilot: "FLUGMAÐUR",
+    addPilot: "BÆTA VIÐ",
+    resetConfirmTitle: "Ertu viss?",
+    resetConfirmDesc: "Þú munt missa allan árangur. Viltu halda áfram?",
+    resetYes: "Já",
+    resetNo: "Nei",
+    showHint: "Sýna vísbendingu"
+  },
+  en: {
+    appTitle: "Space Math",
+    goal: "Goal",
+    coins: "coins",
+    addTitle: "Rocket Launch",
+    addDesc: "Addition of large numbers",
+    subTitle: "Lightning",
+    subDesc: "Space subtraction",
+    algTitle: "Signal X",
+    algDesc: "Find the unknown value",
+    seqTitle: "Orbits & Sequences",
+    seqDesc: "Discover the galactic rule",
+    chainTitle: "Quantum Computer",
+    chainDesc: "Chains of operations",
+    certBtn: "Generate Certificate",
+    missionComplete: "Mission Complete!",
+    yourScore: "Your score is",
+    coinsEarned: "Star coins earned:",
+    backToBase: "Return to Base",
+    great: "Great!",
+    correctWas: "Correct:",
+    comboBroken: "Combo broken :(",
+    certCreator: "Certificate Maker",
+    certInfo: "Fill in the details to generate an official Space Math Certificate with your current rank and score!",
+    cadetName: "Cadet's Name (Child):",
+    placeholderStudent: "e.g. John Doe",
+    commanderName: "Mission Commander (Teacher/Parent):",
+    placeholderTeacher: "e.g. Mr. Smith",
+    certData: "Diploma data:",
+    currentRank: "Current Rank:",
+    solvedTasks: "Solved tasks:",
+    printBtn: "PRINT CERTIFICATE",
+    printTip: 'In print settings, remember to enable "Print backgrounds / Background graphics"!',
+    certWord: "CERTIFICATE",
+    certSub: "Of Space Mathematics",
+    receives: "Awarded to:",
+    achievedRank: "Who achieved the rank:",
+    solvedCorrectly: "Correctly solved tasks:",
+    missionDate: "Mission date:",
+    congrats: "Congratulations from Space Command!",
+    commander: "Mission Commander:",
+    author: "App author:",
+    expAdd: "Remember to add ones to ones, tens to tens...",
+    expSub: "If you lack on top, \"borrow\" from the next column!",
+    expAlg: "Find the missing piece of the galactic puzzle (X).",
+    expSeq: "What space rule applies here?",
+    expChain: "Remember the order of operations! Multiplication first, then addition and subtraction.",
+    ruleDouble: "Double",
+    rank1: "Space Cadet",
+    rank2: "Planet Explorer",
+    rank3: "Galaxy Captain",
+    rank4: "Gravity Master",
+    rank5: "Guardian of the Universe",
+    diffEasy: "Easy",
+    diffMed: "Medium",
+    diffHard: "Hard",
+    catAdd: "Addition",
+    catSub: "Subtraction",
+    catAlg: "Algebra (X)",
+    catSeq: "Sequences",
+    catChain: "Chains",
+    selectPilot: "SELECT PILOT",
+    emptyName: "Enter name...",
+    pilot: "PILOT",
+    addPilot: "ADD PILOT",
+    resetConfirmTitle: "Are you sure?",
+    resetConfirmDesc: "This will delete all progress. Continue?",
+    resetYes: "Yes",
+    resetNo: "No",
+    showHint: "Show hint"
+  }
+};
+
+// --- KOMPONENT TŁA (GWIAZDY) ---
+const Starfield = ({ speedLevel = 0 }) => {
+  const [stars, setStars] = useState([]);
+
+  useEffect(() => {
+    // Generujemy gwiazdy startujące z samego środka
+    const newStars = [...Array(100)].map(() => ({
+      angle: Math.random() * 360, 
+      distance: Math.random() * 100 + 50, 
+      size: Math.random() * 2 + 1, 
+      delay: Math.random() * -10, 
+      baseDuration: Math.random() * 4 + 3, 
+      opacity: Math.random() * 0.8 + 0.2
+    }));
+    setStars(newStars);
+  }, []);
+
+  const speedMultiplier = 1 + (speedLevel * 0.5);
+
+  return (
+    <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
+      <style>{`
         @keyframes fly-out {
-            0% { transform: translateY(0) scale(0.1); opacity: 0; }
-            20% { opacity: var(--star-opacity); }
-            80% { opacity: var(--star-opacity); }
-            100% { transform: translateY(var(--star-distance)) scale(3); opacity: 0; }
+          0% { transform: translateY(0) scale(0.1); opacity: 0; }
+          20% { opacity: var(--star-opacity); }
+          80% { opacity: var(--star-opacity); }
+          100% { transform: translateY(var(--star-distance)) scale(3); opacity: 0; }
         }
+      `}</style>
+      
+      {stars.map((star, i) => {
+        const currentDuration = star.baseDuration / speedMultiplier;
+        const stretch = speedLevel > 0 ? speedLevel * 8 : 0; 
 
-        body {
-            font-family: 'Montserrat', sans-serif;
-            /* Zabezpieczenie przed pull-to-refresh na telefonach */
-            overscroll-behavior: none; 
-        }
+        return (
+          <div
+            key={i}
+            className="absolute top-1/2 left-1/2"
+            style={{ transform: `translate(-50%, -50%) rotate(${star.angle}deg)` }}
+          >
+            <div
+              className="bg-white rounded-full shadow-[0_0_8px_rgba(255,255,255,0.8)]"
+              style={{
+                width: `${star.size}px`,
+                height: `${star.size + stretch}px`,
+                '--star-opacity': star.opacity,
+                '--star-distance': `${star.distance}vmax`,
+                animationName: 'fly-out',
+                animationDuration: `${currentDuration}s`,
+                animationTimingFunction: 'ease-in',
+                animationIterationCount: 'infinite',
+                animationDelay: `${star.delay}s`,
+              }}
+            />
+          </div>
+        );
+      })}
+    </div>
+  );
+};
 
-        /* Ukrywanie paska przewijania (opcjonalne, dla czystszego widoku) */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 10px; }
+// --- GENERATORY ZADAŃ ---
 
-        /* =========================================
-           STYLE DO DRUKU (CERTYFIKAT)
-        ========================================= */
-        @media print {
-            @page { size: A4 portrait; margin: 0; }
-            body * { visibility: hidden; }
-            
-            html, body {
-                width: 100% !important;
-                height: 100% !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                background-color: #0b1120 !important;
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-                color-adjust: exact !important;
-            }
-            
-            #diploma-print-area, #diploma-print-area * { visibility: visible; }
-            
-            #diploma-print-area { 
-                position: fixed !important; 
-                left: 0 !important; 
-                top: 0 !important; 
-                width: 100vw !important; 
-                height: 100vh !important; 
-                display: flex !important; 
-                justify-content: center !important; 
-                align-items: center !important; 
-                margin: 0 !important;
-                padding: 0 !important;
-                z-index: 9999 !important;
-                background-color: #0b1120 !important; 
-                font-family: 'Montserrat', sans-serif !important;
-            }
+const generateAddition = (t, diff) => {
+  let min = 10, max = 50;
+  if (diff === 2) { min = 100; max = 300; }
+  if (diff === 3) { min = 300; max = 999; }
+  const a = Math.floor(Math.random() * (max - min)) + min;
+  const b = Math.floor(Math.random() * (max - min)) + min;
+  const ans = a + b;
+  
+  let strA = a.toString();
+  let strB = b.toString();
+  let cols = ans.toString().length; 
+  
+  let padA = strA.padStart(cols, '0');
+  let padB = strB.padStart(cols, '0');
+  let hintsArr = Array(cols).fill(' ');
+  
+  let carry = 0;
+  for (let i = cols - 1; i >= 0; i--) {
+      let sum = parseInt(padA[i]) + parseInt(padB[i]) + carry;
+      carry = Math.floor(sum / 10);
+      if (carry > 0 && i > 0) {
+          hintsArr[i - 1] = '1';
+      }
+  }
 
-            .print-bg-img {
-                position: absolute !important;
-                top: 0 !important; left: 0 !important;
-                width: 100vw !important; height: 100vh !important;
-                object-fit: cover !important;
-                opacity: 0.75 !important;
-                z-index: -2 !important;
-            }
-            .print-bg-overlay {
-                position: absolute !important;
-                top: 0 !important; left: 0 !important;
-                width: 100vw !important; height: 100vh !important;
-                background: linear-gradient(180deg, rgba(11,17,32,0.85) 0%, rgba(11,17,32,0.2) 100%) !important;
-                z-index: -1 !important;
-            }
-            .print-diploma-border {
-                position: relative !important; z-index: 10 !important;
-                width: 88% !important; height: 94% !important;
-                border: 3px solid #d4af37 !important; 
-                outline: 15px solid rgba(212, 175, 55, 0.1) !important; 
-                outline-offset: -20px !important;
-                padding: 4rem 3rem !important;
-                display: flex !important; flex-direction: column !important; align-items: center !important;
-                box-sizing: border-box !important;
-                background: rgba(15, 23, 42, 0.7) !important;
-            }
-            .print-title { font-family: 'Cinzel', serif !important; font-size: 3.5rem !important; font-weight: 900 !important; color: #d4af37 !important; margin: 0 0 0.5rem 0 !important; letter-spacing: 0.15em !important; }
-            .print-subtitle { font-family: 'Cinzel', serif !important; font-size: 1.5rem !important; font-weight: 700 !important; color: #e2e8f0 !important; text-transform: uppercase !important; letter-spacing: 0.3em !important; margin: 0 0 1.5rem 0 !important; border-bottom: 1px solid #d4af37 !important; padding-bottom: 1rem !important; width: 80% !important; text-align: center !important; }
-            .print-text { font-family: 'Montserrat', sans-serif !important; color: #94a3b8 !important; text-transform: uppercase !important; letter-spacing: 2px !important; font-size: 1rem !important; margin: 1rem 0 !important; }
-            .print-rank-value { font-family: 'Cinzel', serif !important; font-size: 3.5rem !important; color: #f8fafc !important; margin: 0.5rem 0 1.5rem 0 !important; letter-spacing: 0.1em !important; }
-            .print-solved-value { font-family: 'Cinzel', serif !important; font-size: 4rem !important; color: #d4af37 !important; margin: 0.2rem 0 !important; }
-            .print-footer { width: 100% !important; position: absolute !important; bottom: 4rem !important; padding: 0 4rem !important; box-sizing: border-box !important; display: flex !important; justify-content: space-between !important; align-items: flex-end !important; }
-            
-            .no-print { display: none !important; }
-        }
-    </style>
-</head>
-<body class="bg-black text-slate-100 overflow-x-hidden">
+  return {
+    type: 'column',
+    a: a,
+    b: b,
+    operator: '+',
+    answer: ans,
+    explanation: t.expAdd,
+    hints: hintsArr
+  };
+};
 
-    <!-- TŁO I GWIAZDY -->
-    <div class="fixed inset-0 min-h-[100dvh] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900 via-slate-900 to-black z-[-2]"></div>
-    <div id="starfield" class="fixed inset-0 overflow-hidden pointer-events-none z-[-1]"></div>
+const generateSubtraction = (t, diff) => {
+  let minA = 20, maxA = 50, minB = 5, maxB = 20;
+  if (diff === 2) { minA = 100; maxA = 300; minB = 50; maxB = 150; }
+  if (diff === 3) { minA = 500; maxA = 999; minB = 100; maxB = 800; }
+  let a = Math.floor(Math.random() * (maxA - minA)) + minA;
+  let b = Math.floor(Math.random() * (maxB - minB)) + minB;
+  if (b > a) {
+    const temp = a;
+    a = b;
+    b = temp;
+  }
+  const ans = a - b;
 
-    <!-- GŁÓWNY KONTENER APLIKACJI -->
-    <div class="min-h-[100dvh] flex flex-col items-center justify-center p-4 relative z-10 w-full">
+  let strA = a.toString();
+  let strB = b.toString();
+  let cols = strA.length; 
+  
+  let padA = strA.padStart(cols, '0');
+  let padB = strB.padStart(cols, '0');
+  let hintsArr = Array(cols).fill(' ');
+  
+  let topNums = padA.split('').map(Number);
+  let botNums = padB.split('').map(Number);
+  
+  for (let i = cols - 1; i >= 0; i--) {
+      if (topNums[i] < botNums[i]) {
+          let j = i - 1;
+          while (j >= 0 && topNums[j] === 0) j--; 
+          if (j >= 0) {
+              topNums[j] -= 1;
+              hintsArr[j] = topNums[j].toString();
+              for (let k = j + 1; k < i; k++) {
+                  topNums[k] = 9;
+                  hintsArr[k] = '9';
+              }
+              topNums[i] += 10;
+              hintsArr[i] = topNums[i].toString();
+          }
+      }
+  }
+
+  return {
+    type: 'column',
+    a: a,
+    b: b,
+    operator: '-',
+    answer: ans,
+    explanation: t.expSub,
+    hints: hintsArr
+  };
+};
+
+const generateAlgebra = (t, diff) => {
+  const types = ['x+a=b', 'a+x=b', 'x-a=b'];
+  const type = types[Math.floor(Math.random() * types.length)];
+  let min = 2, max = 10;
+  if (diff === 2) { min = 5; max = 25; }
+  if (diff === 3) { min = 15; max = 80; }
+  const a = Math.floor(Math.random() * (max - min)) + min;
+  const answer = Math.floor(Math.random() * (max - min)) + min; 
+  
+  let questionText = '';
+  let b = 0;
+  let hintText = '';
+
+  if (type === 'x+a=b') {
+    b = answer + a;
+    questionText = `X + ${a} = ${b}`;
+    hintText = `${b} - ${a} = ?`;
+  } else if (type === 'a+x=b') {
+    b = a + answer;
+    questionText = `${a} + X = ${b}`;
+    hintText = `${b} - ${a} = ?`;
+  } else if (type === 'x-a=b') {
+    b = answer - a;
+    questionText = `X - ${a} = ${b}`;
+    hintText = `${b} + ${a} = ?`;
+  }
+
+  return {
+    type: 'inline',
+    questionText: questionText,
+    answer: answer,
+    explanation: t.expAlg,
+    hintText: hintText
+  };
+};
+
+const generateSequence = (t, diff) => {
+  let rules = [
+    { name: '+1', op: (x) => x + 1 },
+    { name: '+2', op: (x) => x + 2 },
+    { name: '-1', op: (x) => x - 1 }
+  ];
+  let minStart = 5, maxStart = 20;
+  
+  if (diff === 2) {
+    rules = [{ name: '+2', op: (x) => x + 2 }, { name: '+5', op: (x) => x + 5 }, { name: '-3', op: (x) => x - 3 }, { name: t.ruleDouble, op: (x) => x * 2 }];
+    minStart = 15; maxStart = 35;
+  } else if (diff === 3) {
+    rules = [{ name: '+12', op: (x) => x + 12 }, { name: '+15', op: (x) => x + 15 }, { name: '-8', op: (x) => x - 8 }, { name: '*3', op: (x) => x * 3 }];
+    minStart = 30; maxStart = 60;
+  }
+  
+  const start = Math.floor(Math.random() * (maxStart - minStart)) + minStart;
+  const rule = rules[Math.floor(Math.random() * rules.length)];
+  
+  const seq = [start, rule.op(start), rule.op(rule.op(start))];
+  const answer = rule.op(rule.op(rule.op(start)));
+
+  return {
+    type: 'inline',
+    questionText: `${seq[0]} ➔ ${seq[1]} ➔ ${seq[2]} ➔ ?`,
+    answer: answer,
+    explanation: `${t.expSeq} (${rule.name})`
+  };
+};
+
+const generateChain = (t, diff) => {
+  let qText = '';
+  let answer = 0;
+  
+  if (diff === 1) {
+    // Łatwy: A + B - C
+    const a = Math.floor(Math.random() * 10) + 5; // 5-14
+    const b = Math.floor(Math.random() * 10) + 1; // 1-10
+    const c = Math.floor(Math.random() * (a + b - 1)) + 1; // Gwarantuje wynik dodatni
+    answer = a + b - c;
+    qText = `${a} + ${b} - ${c} = ?`;
+  } else if (diff === 2) {
+    // Średni: A x B +/- C
+    const a = Math.floor(Math.random() * 8) + 2; // 2-9
+    const b = Math.floor(Math.random() * 8) + 2; // 2-9
+    const isPlus = Math.random() > 0.5;
+    
+    if (isPlus) {
+      const c = Math.floor(Math.random() * 20) + 1;
+      answer = (a * b) + c;
+      qText = `${a} × ${b} + ${c} = ?`;
+    } else {
+      const maxC = a * b - 1;
+      const c = Math.floor(Math.random() * maxC) + 1;
+      answer = (a * b) - c;
+      qText = `${a} × ${b} - ${c} = ?`;
+    }
+  } else {
+    // Trudny: A x B + C x D LUB A x B - C (większe liczby)
+    const type = Math.random() > 0.5 ? 'mult2' : 'mixed';
+    if (type === 'mult2') {
+      const a = Math.floor(Math.random() * 6) + 3; // 3-8
+      const b = Math.floor(Math.random() * 6) + 3;
+      const c = Math.floor(Math.random() * 6) + 3;
+      const d = Math.floor(Math.random() * 6) + 3;
+      answer = (a * b) + (c * d);
+      qText = `${a} × ${b} + ${c} × ${d} = ?`;
+    } else {
+       const a = Math.floor(Math.random() * 10) + 5; // 5-14
+       const b = Math.floor(Math.random() * 10) + 5; // 5-14
+       const c = Math.floor(Math.random() * 30) + 10;
+       answer = (a * b) - c;
+       qText = `${a} × ${b} - ${c} = ?`;
+    }
+  }
+  
+  return {
+    type: 'inline',
+    questionText: qText,
+    answer: answer,
+    explanation: t.expChain
+  };
+};
+
+// --- SYSTEM RANG ---
+const getRankInfo = (coins, t) => {
+  if (coins < 100) return { title: t.rank1, nextAt: 100, color: 'text-slate-400', icon: Rocket };
+  if (coins < 300) return { title: t.rank2, nextAt: 300, color: 'text-emerald-400', icon: Radar };
+  if (coins < 600) return { title: t.rank3, nextAt: 600, color: 'text-cyan-400', icon: Star };
+  if (coins < 1000) return { title: t.rank4, nextAt: 1000, color: 'text-fuchsia-400', icon: Orbit };
+  return { title: t.rank5, nextAt: null, color: 'text-yellow-400', icon: Crown };
+};
+
+// --- STYLE DO DRUKU CERTYFIKATU ---
+const PrintStyles = () => (
+  <style>
+    {`
+      @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Montserrat:wght@400;600;700&display=swap');
+
+      @media print {
+        @page { size: A4 portrait; margin: 0; }
+        body * { visibility: hidden; }
         
-        <!-- EKRAN MENU -->
-        <div id="menu-screen" class="max-w-md w-full bg-slate-800/60 backdrop-blur-md rounded-3xl shadow-2xl shadow-indigo-900/50 overflow-hidden border border-slate-700/50 no-print transition-opacity duration-300">
-            <div class="bg-gradient-to-r from-indigo-600/80 to-purple-700/80 p-6 text-center shadow-md relative overflow-hidden">
-                <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-30 mix-blend-overlay pointer-events-none"></div>
-                
-                <!-- Flagi języków -->
-                <div class="flex justify-center gap-4 mb-4 relative z-20">
-                    <button onclick="setLang('pl')" id="flag-pl" class="w-9 h-9 rounded-full overflow-hidden border-2 border-transparent opacity-50 hover:opacity-100 hover:scale-110 transition-all">
-                        <img src="https://flagcdn.com/w80/pl.png" alt="PL" class="w-full h-full object-cover" />
-                    </button>
-                    <button onclick="setLang('is')" id="flag-is" class="w-9 h-9 rounded-full overflow-hidden border-2 border-transparent opacity-50 hover:opacity-100 hover:scale-110 transition-all">
-                        <img src="https://flagcdn.com/w80/is.png" alt="IS" class="w-full h-full object-cover" />
-                    </button>
-                    <button onclick="setLang('en')" id="flag-en" class="w-9 h-9 rounded-full overflow-hidden border-2 border-transparent opacity-50 hover:opacity-100 hover:scale-110 transition-all">
-                        <img src="https://flagcdn.com/w80/gb.png" alt="EN" class="w-full h-full object-cover" />
-                    </button>
-                </div>
+        html, body {
+          width: 100% !important;
+          height: 100% !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          background-color: #0b1120 !important;
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+          color-adjust: exact !important;
+        }
+        
+        #diploma-print-area, #diploma-print-area * { visibility: visible; }
+        
+        #diploma-print-area { 
+          position: fixed !important; 
+          left: 0 !important; 
+          top: 0 !important; 
+          width: 100vw !important; 
+          height: 100vh !important; 
+          display: flex !important; 
+          justify-content: center !important; 
+          align-items: center !important; 
+          margin: 0 !important;
+          padding: 0 !important;
+          z-index: 9999 !important;
+          background-color: #0b1120 !important; 
+          font-family: 'Montserrat', sans-serif !important;
+        }
 
-                <h1 class="text-3xl sm:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-white to-indigo-200 tracking-tight drop-shadow-sm mb-2 relative z-10 flex justify-center items-center gap-2">
-                    <i data-lucide="sparkles" class="text-yellow-300 w-8 h-8"></i>
-                    <span id="t-appTitle">Kosmiczna Matma</span>
-                </h1>
-                
-                <!-- Karta Profilu -->
-                <div class="mt-4 bg-black/30 backdrop-blur-sm rounded-2xl p-4 border border-white/10 relative z-10">
-                    <div class="flex justify-between items-center mb-2">
-                        <div class="flex items-center gap-2">
-                            <div id="menu-rank-icon-container" class="p-1.5 rounded-full bg-slate-800 border border-slate-600 shadow-[0_0_10px_rgba(255,255,255,0.1)] text-slate-400">
-                                <i id="menu-rank-icon" data-lucide="rocket" class="w-5 h-5"></i>
-                            </div>
-                            <span id="menu-rank-title" class="text-white font-bold text-sm sm:text-base">Kosmiczny Kadet</span>
-                        </div>
-                        <div class="flex items-center text-yellow-400 font-bold text-lg drop-shadow-[0_0_5px_rgba(250,204,21,0.5)]">
-                            <i data-lucide="coins" class="w-5 h-5 mr-1"></i>
-                            <span id="menu-total-coins">0</span>
-                        </div>
-                    </div>
-                    
-                    <div id="progress-container" class="mt-3">
-                        <div class="flex justify-between text-indigo-200 text-xs mb-1 font-medium">
-                            <span id="t-goal-text">Cel: 100 monet</span>
-                            <span id="menu-progress-pct">0%</span>
-                        </div>
-                        <div class="h-2.5 w-full bg-slate-900/80 rounded-full overflow-hidden border border-slate-700">
-                            <div id="menu-progress-bar" class="h-full bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(56,189,248,0.5)]" style="width: 0%;"></div>
-                        </div>
-                    </div>
-                </div>
+        .print-bg-img {
+          position: absolute !important;
+          top: 0 !important; left: 0 !important;
+          width: 100vw !important; height: 100vh !important;
+          object-fit: cover !important;
+          opacity: 0.75 !important;
+          z-index: -2 !important;
+        }
+        .print-bg-overlay {
+          position: absolute !important;
+          top: 0 !important; left: 0 !important;
+          width: 100vw !important; height: 100vh !important;
+          background: linear-gradient(180deg, rgba(11,17,32,0.85) 0%, rgba(11,17,32,0.2) 100%) !important;
+          z-index: -1 !important;
+        }
+        .print-diploma-border {
+          position: relative !important; z-index: 10 !important;
+          width: 88% !important; height: 94% !important;
+          border: 3px solid #d4af37 !important; 
+          outline: 15px solid rgba(212, 175, 55, 0.1) !important; 
+          outline-offset: -20px !important;
+          padding: 4rem 3rem !important;
+          display: flex !important; flex-direction: column !important; align-items: center !important;
+          box-sizing: border-box !important;
+          background: rgba(15, 23, 42, 0.7) !important;
+        }
+        .print-title { font-family: 'Cinzel', serif !important; font-size: 3.5rem !important; font-weight: 900 !important; color: #d4af37 !important; margin: 0 0 0.5rem 0 !important; letter-spacing: 0.15em !important; }
+        .print-subtitle { font-family: 'Cinzel', serif !important; font-size: 1.5rem !important; font-weight: 700 !important; color: #e2e8f0 !important; text-transform: uppercase !important; letter-spacing: 0.3em !important; margin: 0 0 1.5rem 0 !important; border-bottom: 1px solid #d4af37 !important; padding-bottom: 1rem !important; width: 80% !important; text-align: center !important; }
+        .print-text { font-family: 'Montserrat', sans-serif !important; color: #94a3b8 !important; text-transform: uppercase !important; letter-spacing: 2px !important; font-size: 1rem !important; margin: 1rem 0 !important; }
+        .print-rank-value { font-family: 'Cinzel', serif !important; font-size: 3.5rem !important; color: #f8fafc !important; margin: 0.5rem 0 1.5rem 0 !important; letter-spacing: 0.1em !important; }
+        .print-solved-value { font-family: 'Cinzel', serif !important; font-size: 4rem !important; color: #d4af37 !important; margin: 0.5rem 0 !important; }
+        .print-footer { width: 100% !important; position: absolute !important; bottom: 4rem !important; padding: 0 4rem !important; box-sizing: border-box !important; display: flex !important; justify-content: space-between !important; align-items: flex-end !important; }
+        .no-print { display: none !important; }
+      }
+    `}
+  </style>
+);
+
+// --- GŁÓWNY KOMPONENT ---
+export default function App() {
+  const [lang, setLang] = useState('pl'); // 'pl', 'is', 'en'
+  const [currentScreen, setCurrentScreen] = useState('menu'); 
+  const [gameMode, setGameMode] = useState(null);
+  const [score, setScore] = useState(0);
+  const [questionCount, setQuestionCount] = useState(0);
+  const [currentQuestion, setCurrentQuestion] = useState(null);
+  const [userAnswer, setUserAnswer] = useState('');
+  const [feedback, setFeedback] = useState(null); 
+  const [isHintVisible, setIsHintVisible] = useState(false);
+  
+  // Zmienne Grywalizacji
+  const [totalCoins, setTotalCoins] = useState(0);
+  const [sessionCoins, setSessionCoins] = useState(0);
+  const [totalSolved, setTotalSolved] = useState(0); 
+  const [combo, setCombo] = useState(0);
+  const [earnedJustNow, setEarnedJustNow] = useState(0);
+  const [currentDifficulty, setCurrentDifficulty] = useState(2);
+  const maxQuestions = 5;
+
+  // Zmienne do Certyfikatu
+  const [studentName, setStudentName] = useState('');
+  const [teacherName, setTeacherName] = useState('');
+
+  // --- STAN MULTI-USER ---
+  // Dodana właściwość sChain do śledzenia punktów w nowym trybie. Używamy fallback dla kompatybilności.
+  const [users, setUsers] = useState(() => {
+    const saved = localStorage.getItem('spaceMath_v2_users');
+    if (saved) return JSON.parse(saved);
+    return [{ name: '', coins: 0, sAdd: 0, sSub: 0, sAlg: 0, sSeq: 0, sChain: 0 }];
+  });
+  const [activeIdx, setActiveIdx] = useState(() => {
+    return parseInt(localStorage.getItem('spaceMath_v2_activeIdx') || '-1', 10);
+  });
+  const [resetTarget, setResetTarget] = useState(null);
+
+  useEffect(() => {
+    localStorage.setItem('spaceMath_v2_users', JSON.stringify(users));
+  }, [users]);
+
+  useEffect(() => {
+    localStorage.setItem('spaceMath_v2_activeIdx', activeIdx.toString());
+  }, [activeIdx]);
+
+  useEffect(() => {
+    const savedLang = localStorage.getItem('spaceMathLang');
+    if (savedLang) setLang(savedLang);
+
+    const savedDiff = localStorage.getItem('spaceMathDiff');
+    if (savedDiff) setCurrentDifficulty(parseInt(savedDiff, 10));
+  }, []);
+
+  const t = TRANSLATIONS[lang];
+
+  // Jeśli nie ma aktywnego użytkownika, po prostu ustaw "pustego" dla bezpiecznego renderowania tła
+  const activeUser = users[activeIdx] || { name: '', coins: 0, sAdd: 0, sSub: 0, sAlg: 0, sSeq: 0, sChain: 0 };
+  const totalUserSolved = activeUser.sAdd + activeUser.sSub + activeUser.sAlg + activeUser.sSeq + (activeUser.sChain || 0);
+
+  const handleSetDifficulty = (level) => {
+    setCurrentDifficulty(level);
+    localStorage.setItem('spaceMathDiff', level.toString());
+  };
+
+  const handleLanguageChange = (newLang) => {
+    setLang(newLang);
+    localStorage.setItem('spaceMathLang', newLang);
+  };
+
+  // --- ZARZĄDZANIE PILOTAMI ---
+  const handleNameChange = (idx, value) => {
+    const newUsers = [...users];
+    newUsers[idx].name = value;
+    setUsers(newUsers);
+  };
+
+  const selectUser = (idx) => {
+    const newUsers = [...users];
+    if (newUsers[idx].name.trim() === "") {
+      newUsers[idx].name = t.pilot + " " + (idx + 1);
+      setUsers(newUsers);
+    }
+    setActiveIdx(idx);
+    setCurrentScreen('menu');
+  };
+
+  const addNewPilot = () => {
+    if (users.length >= 8) return;
+    setUsers([...users, { name: '', coins: 0, sAdd: 0, sSub: 0, sAlg: 0, sSeq: 0, sChain: 0 }]);
+  };
+
+  const removePilot = (idx, event) => {
+    event.stopPropagation();
+    setResetTarget(idx);
+  };
+
+  const openResetModalCurrent = () => {
+    setResetTarget('current');
+  };
+
+  const closeResetModal = () => {
+    setResetTarget(null);
+  };
+
+  const resetProgress = () => {
+    if (resetTarget === 'current') {
+      if(activeIdx === -1) return;
+      const newUsers = [...users];
+      newUsers[activeIdx] = { ...newUsers[activeIdx], coins: 0, sAdd: 0, sSub: 0, sAlg: 0, sSeq: 0, sChain: 0 };
+      setUsers(newUsers);
+    } else if (typeof resetTarget === 'number') {
+      let newUsers = [...users];
+      newUsers.splice(resetTarget, 1);
+      if (newUsers.length === 0) newUsers = [{ name: '', coins: 0, sAdd: 0, sSub: 0, sAlg: 0, sSeq: 0, sChain: 0 }];
+      setUsers(newUsers);
+      setActiveIdx(-1);
+    }
+    closeResetModal();
+  };
+
+  const startGame = (mode) => {
+    setGameMode(mode);
+    setScore(0);
+    setQuestionCount(0);
+    setUserAnswer('');
+    setFeedback(null);
+    setCombo(0);
+    setSessionCoins(0);
+    nextQuestion(mode);
+    setCurrentScreen('game');
+  };
+
+  const nextQuestion = (mode = gameMode) => {
+    setUserAnswer('');
+    setFeedback(null);
+    setEarnedJustNow(0);
+    setIsHintVisible(false);
+    if (mode === 'add') setCurrentQuestion(generateAddition(t, currentDifficulty));
+    if (mode === 'sub') setCurrentQuestion(generateSubtraction(t, currentDifficulty));
+    if (mode === 'algebra') setCurrentQuestion(generateAlgebra(t, currentDifficulty));
+    if (mode === 'sequence') setCurrentQuestion(generateSequence(t, currentDifficulty));
+    if (mode === 'chain') setCurrentQuestion(generateChain(t, currentDifficulty));
+  };
+
+  const handleNumpadPress = (num) => {
+    if (feedback) return; 
+    if (userAnswer.length < 4) {
+      if (currentQuestion && currentQuestion.type === 'column') {
+        setUserAnswer(num.toString() + userAnswer); // Dodawanie na początek w dodawaniu słupkowym
+      } else {
+        setUserAnswer(prev => prev + num); // Dodawanie na koniec w pozostałych
+      }
+    }
+  };
+
+  const handleBackspace = () => {
+    if (feedback) return;
+    if (userAnswer.length > 0) {
+      if (currentQuestion && currentQuestion.type === 'column') {
+        setUserAnswer(userAnswer.slice(1)); 
+      } else {
+        setUserAnswer(prev => prev.slice(0, -1)); 
+      }
+    }
+  };
+
+  const checkAnswer = () => {
+    if (!userAnswer || activeIdx === -1) return;
+    
+    const isCorrect = parseInt(userAnswer) === currentQuestion.answer;
+    
+    if (isCorrect) {
+      const comboBonus = combo >= 2 ? 5 : 0; 
+      const coinsToGive = (currentDifficulty * 5) + comboBonus;
+      
+      setEarnedJustNow(coinsToGive);
+      setSessionCoins(prev => prev + coinsToGive);
+      
+      const newUsers = [...users];
+      newUsers[activeIdx].coins += coinsToGive;
+      if (gameMode === 'add') newUsers[activeIdx].sAdd += 1;
+      else if (gameMode === 'sub') newUsers[activeIdx].sSub += 1;
+      else if (gameMode === 'algebra') newUsers[activeIdx].sAlg += 1;
+      else if (gameMode === 'sequence') newUsers[activeIdx].sSeq += 1;
+      else if (gameMode === 'chain') newUsers[activeIdx].sChain = (newUsers[activeIdx].sChain || 0) + 1;
+      setUsers(newUsers);
+      
+      setFeedback('correct');
+      setScore(prev => prev + 1);
+      setCombo(prev => prev + 1);
+    } else {
+      setFeedback('incorrect');
+      setCombo(0); 
+    }
+
+    setTimeout(() => {
+      if (questionCount + 1 >= maxQuestions) {
+        setCurrentScreen('result');
+      } else {
+        setQuestionCount(prev => prev + 1);
+        nextQuestion();
+      }
+    }, 1800);
+  };
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const rankInfo = getRankInfo(activeUser.coins, t);
+
+  // START APP
+  useEffect(() => {
+    if (activeIdx === -1 && currentScreen !== 'profile') {
+      setCurrentScreen('profile');
+    }
+  }, [activeIdx]);
+
+
+  // --- EKRAN WYBORU PROFILU ---
+  if (currentScreen === 'profile') {
+    return (
+      <div className="min-h-[100dvh] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900 via-slate-900 to-black flex items-center justify-center p-4 font-sans text-slate-100 relative">
+        <Starfield speedLevel={0} />
+        
+        {/* Modal Potwierdzenia Usunięcia */}
+        {resetTarget !== null && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 modal-overlay">
+            <div className="bg-slate-900 border-2 border-red-500/50 rounded-3xl p-8 max-w-xs w-full text-center shadow-[0_0_50px_rgba(239,68,68,0.3)]">
+              <div className="bg-red-500/20 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-500">
+                <XIcon className="text-red-500 w-8 h-8" />
+              </div>
+              <h3 className="text-xl font-bold text-white mb-2">{t.resetConfirmTitle}</h3>
+              <p className="text-slate-400 text-sm mb-6">{t.resetConfirmDesc}</p>
+              <div className="flex gap-3">
+                <button onClick={closeResetModal} className="flex-1 py-3 bg-slate-800 hover:bg-slate-700 rounded-xl font-bold transition-all">{t.resetNo}</button>
+                <button onClick={resetProgress} className="flex-1 py-3 bg-red-600 hover:bg-red-500 text-white rounded-xl font-bold transition-all shadow-lg shadow-red-900/40">{t.resetYes}</button>
+              </div>
             </div>
+          </div>
+        )}
 
-            <div class="p-6 grid gap-4">
-                <!-- Wybór poziomu trudności -->
-                <div class="flex justify-between bg-slate-900/60 p-1.5 rounded-2xl border border-slate-700/50 mb-2 relative z-20">
-                    <button onclick="setDifficulty(1)" id="btn-diff-1" class="flex-1 py-2 text-sm font-bold rounded-xl transition-all text-emerald-400 opacity-50 hover:opacity-100"><span id="t-diffEasy">Łatwy</span> (x1)</button>
-                    <button onclick="setDifficulty(2)" id="btn-diff-2" class="flex-1 py-2 text-sm font-bold rounded-xl transition-all text-cyan-400 shadow-[0_0_10px_rgba(34,211,238,0.3)] bg-slate-700/80 border border-slate-600 text-white"><span id="t-diffMed">Średni</span> (x2)</button>
-                    <button onclick="setDifficulty(3)" id="btn-diff-3" class="flex-1 py-2 text-sm font-bold rounded-xl transition-all text-fuchsia-400 opacity-50 hover:opacity-100"><span id="t-diffHard">Trudny</span> (x3)</button>
-                </div>
-
-                <button onclick="startGame('add')" class="group flex items-center p-4 bg-slate-800/80 hover:bg-slate-700/80 rounded-2xl transition-all duration-200 border border-slate-600 hover:border-indigo-400 hover:shadow-[0_0_15px_rgba(99,102,241,0.3)] w-full">
-                    <div class="bg-gradient-to-br from-blue-500 to-indigo-600 p-3 rounded-xl text-white shadow-lg group-hover:scale-110 transition-transform">
-                        <i data-lucide="rocket" class="w-7 h-7"></i>
-                    </div>
-                    <div class="ml-4 text-left">
-                        <h2 id="t-addTitle" class="text-xl font-bold text-white">Start Rakiety</h2>
-                        <p id="t-addDesc" class="text-sm text-indigo-300">Dodawanie dużych liczb</p>
-                    </div>
-                </button>
-
-                <button onclick="startGame('sub')" class="group flex items-center p-4 bg-slate-800/80 hover:bg-slate-700/80 rounded-2xl transition-all duration-200 border border-slate-600 hover:border-fuchsia-400 hover:shadow-[0_0_15px_rgba(232,121,249,0.3)] w-full">
-                    <div class="bg-gradient-to-br from-fuchsia-500 to-purple-600 p-3 rounded-xl text-white shadow-lg group-hover:scale-110 transition-transform">
-                        <i data-lucide="zap" class="w-7 h-7"></i>
-                    </div>
-                    <div class="ml-4 text-left">
-                        <h2 id="t-subTitle" class="text-xl font-bold text-white">Błyskawica</h2>
-                        <p id="t-subDesc" class="text-sm text-indigo-300">Kosmiczne odejmowanie</p>
-                    </div>
-                </button>
-
-                <button onclick="startGame('algebra')" class="group flex items-center p-4 bg-slate-800/80 hover:bg-slate-700/80 rounded-2xl transition-all duration-200 border border-slate-600 hover:border-emerald-400 hover:shadow-[0_0_15px_rgba(52,211,153,0.3)] w-full">
-                    <div class="bg-gradient-to-br from-emerald-400 to-teal-600 p-3 rounded-xl text-white shadow-lg group-hover:scale-110 transition-transform">
-                        <i data-lucide="radar" class="w-7 h-7"></i>
-                    </div>
-                    <div class="ml-4 text-left">
-                        <h2 id="t-algTitle" class="text-xl font-bold text-white">Sygnał X</h2>
-                        <p id="t-algDesc" class="text-sm text-indigo-300">Znajdź nieznaną wartość</p>
-                    </div>
-                </button>
-
-                <button onclick="startGame('sequence')" class="group flex items-center p-4 bg-slate-800/80 hover:bg-slate-700/80 rounded-2xl transition-all duration-200 border border-slate-600 hover:border-cyan-400 hover:shadow-[0_0_15px_rgba(34,211,238,0.3)] w-full">
-                    <div class="bg-gradient-to-br from-cyan-400 to-blue-600 p-3 rounded-xl text-white shadow-lg group-hover:scale-110 transition-transform">
-                        <i data-lucide="orbit" class="w-7 h-7"></i>
-                    </div>
-                    <div class="ml-4 text-left">
-                        <h2 id="t-seqTitle" class="text-xl font-bold text-white">Orbity i Ciągi</h2>
-                        <p id="t-seqDesc" class="text-sm text-indigo-300">Odkryj galaktyczną regułę</p>
-                    </div>
-                </button>
-
-                <div class="mt-2 pt-4 border-t border-slate-700/50">
-                    <button onclick="showScreen('certificate-screen')" class="w-full flex justify-center items-center gap-2 py-3 bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-500 hover:to-orange-500 text-white rounded-xl font-bold text-md transition-all shadow-[0_0_15px_rgba(234,179,8,0.3)] active:scale-95 border border-yellow-400/50">
-                        <i data-lucide="scroll" class="w-5 h-5"></i>
-                        <span id="t-certBtn">Generuj Certyfikat</span>
-                    </button>
-                </div>
-
-                <div class="mt-2 text-center">
-                    <p class="text-xs text-slate-500">
-                        <span id="t-author">Autor aplikacji:</span> <span class="text-indigo-400 font-semibold">Mirosław Józef "Miras"</span>
-                    </p>
-                </div>
+        <div className="max-w-md w-full no-print relative z-10 transition-opacity duration-300">
+          <div className="text-center mb-6">
+            <div className="flex justify-center gap-4 mb-6">
+              <button onClick={() => handleLanguageChange('pl')} className={`w-10 h-10 rounded-full overflow-hidden border-2 transition-all hover:scale-110 ${lang === 'pl' ? 'border-cyan-400 scale-110 shadow-[0_0_15px_rgba(34,211,238,0.8)]' : 'border-transparent opacity-50 hover:opacity-100'}`}>
+                <img src="https://flagcdn.com/w80/pl.png" alt="PL" className="w-full h-full object-cover" />
+              </button>
+              <button onClick={() => handleLanguageChange('is')} className={`w-10 h-10 rounded-full overflow-hidden border-2 transition-all hover:scale-110 ${lang === 'is' ? 'border-cyan-400 scale-110 shadow-[0_0_15px_rgba(34,211,238,0.8)]' : 'border-transparent opacity-50 hover:opacity-100'}`}>
+                <img src="https://flagcdn.com/w80/is.png" alt="IS" className="w-full h-full object-cover" />
+              </button>
+              <button onClick={() => handleLanguageChange('en')} className={`w-10 h-10 rounded-full overflow-hidden border-2 transition-all hover:scale-110 ${lang === 'en' ? 'border-cyan-400 scale-110 shadow-[0_0_15px_rgba(34,211,238,0.8)]' : 'border-transparent opacity-50 hover:opacity-100'}`}>
+                <img src="https://flagcdn.com/w80/gb.png" alt="EN" className="w-full h-full object-cover" />
+              </button>
             </div>
+            <h2 className="text-3xl font-black text-white tracking-widest drop-shadow-lg mb-2 uppercase">{t.selectPilot}</h2>
+            <div className="h-1 w-20 bg-indigo-500 mx-auto rounded-full"></div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 mb-4">
+            {users.map((u, i) => {
+              const uRank = getRankInfo(u.coins, t);
+              const URankIcon = uRank.icon;
+              return (
+                <div key={i} onClick={() => selectUser(i)} className="relative bg-slate-800/80 border border-slate-700 p-4 rounded-3xl flex flex-col items-center gap-2 transition-all hover:border-indigo-500 shadow-xl cursor-pointer group">
+                  <button onClick={(e) => removePilot(i, e)} className="absolute top-3 right-3 p-1.5 text-slate-500 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100 z-30">
+                    <XIcon size={16} />
+                  </button>
+                  <div className={`p-3 bg-slate-900 rounded-full border-2 border-indigo-500/30 ${uRank.color}`}>
+                    <URankIcon size={32} />
+                  </div>
+                  
+                  {u.name ? (
+                    <div className="font-bold text-white text-base truncate w-full text-center py-1">{u.name}</div>
+                  ) : (
+                    <input 
+                      id={`name-input-${i}`} 
+                      type="text" 
+                      value={u.name}
+                      onChange={(e) => handleNameChange(i, e.target.value)}
+                      onClick={(e) => e.stopPropagation()}
+                      className="w-full bg-black/40 border border-slate-600 rounded-lg p-1 text-center text-sm text-white placeholder-slate-500 focus:border-indigo-400 focus:outline-none" 
+                      placeholder={t.emptyName} 
+                    />
+                  )}
+
+                  <div className="text-[9px] text-indigo-300 font-bold uppercase tracking-widest">{uRank.title}</div>
+                  <div className="text-yellow-400 font-bold flex items-center gap-1 text-xs"><Coins size={12} /> {u.coins}</div>
+                </div>
+              );
+            })}
+
+            {users.length < 8 && (
+              <div onClick={addNewPilot} className="bg-indigo-900/20 border-2 border-dashed border-indigo-500/30 p-4 rounded-3xl flex flex-col items-center justify-center gap-2 transition-all hover:bg-indigo-900/40 hover:border-indigo-400 cursor-pointer min-h-[140px]">
+                <div className="p-3 bg-indigo-500/20 rounded-full text-indigo-400"><Sparkles size={32} /></div>
+                <div className="font-bold text-indigo-300 text-xs uppercase tracking-tighter">{t.addPilot}</div>
+              </div>
+            )}
+          </div>
         </div>
+      </div>
+    );
+  }
 
-        <!-- EKRAN GRY -->
-        <div id="game-screen" class="hidden max-w-md w-full bg-slate-900/80 backdrop-blur-md sm:rounded-3xl shadow-2xl shadow-black/50 overflow-hidden flex flex-col min-h-[100dvh] sm:min-h-[650px] sm:h-auto border-x sm:border border-slate-700 no-print">
+  // --- EKRAN MENU GŁÓWNEGO ---
+  if (currentScreen === 'menu') {
+    const RankIcon = rankInfo.icon;
+    const progressPercent = rankInfo.nextAt ? Math.min(100, Math.round((activeUser.coins / rankInfo.nextAt) * 100)) : 100;
+
+    return (
+      <div className="min-h-[100dvh] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900 via-slate-900 to-black flex items-center justify-center p-4 font-sans text-slate-100 relative">
+        <Starfield speedLevel={0} />
+        
+        {resetTarget !== null && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 modal-overlay">
+            <div className="bg-slate-900 border-2 border-red-500/50 rounded-3xl p-8 max-w-xs w-full text-center shadow-[0_0_50px_rgba(239,68,68,0.3)]">
+              <div className="bg-red-500/20 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-500">
+                <XIcon className="text-red-500 w-8 h-8" />
+              </div>
+              <h3 className="text-xl font-bold text-white mb-2">{t.resetConfirmTitle}</h3>
+              <p className="text-slate-400 text-sm mb-6">{t.resetConfirmDesc}</p>
+              <div className="flex gap-3">
+                <button onClick={closeResetModal} className="flex-1 py-3 bg-slate-800 hover:bg-slate-700 rounded-xl font-bold transition-all">{t.resetNo}</button>
+                <button onClick={resetProgress} className="flex-1 py-3 bg-red-600 hover:bg-red-500 text-white rounded-xl font-bold transition-all shadow-lg shadow-red-900/40">{t.resetYes}</button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="max-w-md w-full bg-slate-800/60 backdrop-blur-md rounded-3xl shadow-2xl shadow-indigo-900/50 overflow-hidden border border-slate-700/50 relative z-10">
+          
+          <div className="bg-gradient-to-r from-indigo-600/80 to-purple-700/80 p-6 text-center shadow-md relative overflow-hidden">
+            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-30 mix-blend-overlay"></div>
             
-            <div class="flex justify-between items-center p-4 bg-slate-800/80 border-b border-slate-700 shrink-0">
-                <button onclick="showScreen('menu-screen')" class="p-2 text-indigo-300 hover:text-white hover:bg-slate-700 rounded-full transition-colors">
-                    <i data-lucide="arrow-left" class="w-6 h-6"></i>
-                </button>
-                
-                <div id="combo-container" class="hidden flex gap-2 items-center">
-                    <div class="flex items-center text-orange-400 bg-orange-900/40 px-3 py-1 rounded-full font-bold text-sm animate-pulse border border-orange-500/50 shadow-[0_0_10px_rgba(249,115,22,0.4)]">
-                        <i data-lucide="flame" class="w-4 h-4 mr-1 text-orange-500 fill-orange-500"></i>
-                        Combo x<span id="combo-value">2</span>!
-                    </div>
-                </div>
-
-                <div class="flex gap-4 items-center">
-                    <div class="flex items-center text-yellow-400 font-bold bg-black/40 px-3 py-1 rounded-full border border-yellow-500/30 shadow-[0_0_8px_rgba(250,204,21,0.2)]">
-                        <i data-lucide="coins" class="w-4 h-4 mr-1"></i> <span id="game-session-coins">0</span>
-                    </div>
-                </div>
+            <div className="flex justify-start mb-4 relative z-20">
+              <button onClick={() => setCurrentScreen('profile')} className="p-2 bg-black/40 hover:bg-black/60 rounded-full border border-white/20 transition-all flex items-center gap-2 px-4 text-[10px] font-bold uppercase tracking-widest">
+                <Orbit size={16} /> <span>{activeUser.name}</span>
+              </button>
             </div>
 
-            <div class="w-full bg-slate-800 h-1.5 flex shrink-0">
-                <div id="game-progress-bar" class="bg-gradient-to-r from-cyan-400 to-blue-500 h-full transition-all duration-300 shadow-[0_0_8px_rgba(56,189,248,0.8)]" style="width: 0%;"></div>
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-white to-indigo-200 tracking-tight drop-shadow-sm mb-2 relative z-10 flex justify-center items-center gap-2">
+              <Sparkles className="text-yellow-300" size={32} />
+              {t.appTitle}
+            </h1>
+            
+            {/* Karta Profilu */}
+            <div className="mt-4 bg-black/30 backdrop-blur-sm rounded-2xl p-4 border border-white/10 relative z-10">
+              <div className="flex justify-between items-center mb-2">
+                <div className="flex items-center gap-2">
+                  <div className={`p-1.5 rounded-full bg-slate-800 border border-slate-600 shadow-[0_0_10px_rgba(255,255,255,0.1)] ${rankInfo.color}`}>
+                    <RankIcon size={20} strokeWidth={2.5} />
+                  </div>
+                  <span className="text-white font-bold text-sm sm:text-base">{rankInfo.title}</span>
+                  <button onClick={openResetModalCurrent} className="ml-1 p-1 text-slate-500 hover:text-red-400 transition-colors">
+                    <XIcon size={16} />
+                  </button>
+                </div>
+                <div className="flex items-center text-yellow-400 font-bold text-lg drop-shadow-[0_0_5px_rgba(250,204,21,0.5)]">
+                  <Coins size={20} className="mr-1" />
+                  {activeUser.coins}
+                </div>
+              </div>
+              
+              {rankInfo.nextAt && (
+                <div className="mt-3">
+                  <div className="flex justify-between text-indigo-200 text-xs mb-1 font-medium">
+                    <span>{t.goal}: {rankInfo.nextAt} {t.coins}</span>
+                    <span>{progressPercent}%</span>
+                  </div>
+                  <div className="h-2.5 w-full bg-slate-900/80 rounded-full overflow-hidden border border-slate-700">
+                    <div 
+                      className="h-full bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full transition-all duration-1000 ease-out shadow-[0_0_10px_rgba(56,189,248,0.5)]"
+                      style={{ width: `${progressPercent}%` }}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="p-6 grid gap-4">
+            <div className="flex justify-between bg-slate-900/60 p-1.5 rounded-2xl border border-slate-700/50 mb-2 relative z-20">
+              <button onClick={() => handleSetDifficulty(1)} className={`flex-1 py-2 text-sm font-bold rounded-xl transition-all ${currentDifficulty === 1 ? 'bg-slate-700/80 border border-emerald-500 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.4)] opacity-100' : 'text-emerald-400 opacity-50 hover:opacity-100 border border-transparent'}`}>{t.diffEasy}</button>
+              <button onClick={() => handleSetDifficulty(2)} className={`flex-1 py-2 text-sm font-bold rounded-xl transition-all ${currentDifficulty === 2 ? 'bg-slate-700/80 border border-cyan-500 text-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.4)] opacity-100' : 'text-cyan-400 opacity-50 hover:opacity-100 border border-transparent'}`}>{t.diffMed}</button>
+              <button onClick={() => handleSetDifficulty(3)} className={`flex-1 py-2 text-sm font-bold rounded-xl transition-all ${currentDifficulty === 3 ? 'bg-slate-700/80 border border-fuchsia-500 text-fuchsia-400 shadow-[0_0_15px_rgba(217,70,239,0.4)] opacity-100' : 'text-fuchsia-400 opacity-50 hover:opacity-100 border border-transparent'}`}>{t.diffHard}</button>
             </div>
 
-            <div class="flex-1 flex flex-col relative min-h-[250px] sm:min-h-[300px]">
-                
-                <!-- Powiadomienia -->
-                <div id="feedback-correct" class="hidden absolute top-2 left-0 right-0 flex flex-col items-center z-10 pointer-events-none">
-                    <div class="bg-emerald-500/20 backdrop-blur-sm border border-emerald-500/50 text-emerald-300 px-6 py-1.5 sm:py-2 rounded-full font-bold flex items-center shadow-[0_0_15px_rgba(16,185,129,0.3)] mb-1 transform scale-110">
-                        <i data-lucide="check" class="w-5 h-5 mr-2"></i> <span id="t-great">Świetnie!</span>
-                    </div>
-                    <div class="text-yellow-400 font-extrabold text-lg sm:text-xl animate-bounce drop-shadow-[0_0_8px_rgba(250,204,21,0.8)]">
-                        +<span id="earned-just-now">10</span> 🪙
-                    </div>
-                </div>
+            <button onClick={() => startGame('add')} className="group flex items-center p-4 bg-slate-800/80 hover:bg-slate-700/80 rounded-2xl transition-all duration-200 border border-slate-600 hover:border-indigo-400 hover:shadow-[0_0_15px_rgba(99,102,241,0.3)]">
+              <div className="bg-gradient-to-br from-blue-500 to-indigo-600 p-3 rounded-xl text-white shadow-lg group-hover:scale-110 transition-transform"><Rocket size={28} strokeWidth={2.5} /></div>
+              <div className="ml-4 text-left"><h2 className="text-xl font-bold text-white">{t.addTitle}</h2><p className="text-sm text-indigo-300">{t.addDesc}</p></div>
+            </button>
 
-                <div id="feedback-incorrect" class="hidden absolute top-2 left-0 right-0 flex flex-col items-center z-10 pointer-events-none">
-                    <div class="bg-red-500/20 backdrop-blur-sm border border-red-500/50 text-red-300 px-6 py-1.5 sm:py-2 rounded-full font-bold flex items-center shadow-[0_0_15px_rgba(239,68,68,0.3)] transform scale-110">
-                        <i data-lucide="x" class="w-5 h-5 mr-2"></i> <span id="t-correctWas">Prawidłowo:</span>&nbsp;<span id="correct-answer-display"></span>
-                    </div>
-                    <div id="combo-broken-msg" class="hidden text-slate-400 mt-1 text-xs sm:text-sm"><span id="t-comboBroken">Seria przerwana :(</span></div>
-                </div>
+            <button onClick={() => startGame('sub')} className="group flex items-center p-4 bg-slate-800/80 hover:bg-slate-700/80 rounded-2xl transition-all duration-200 border border-slate-600 hover:border-fuchsia-400 hover:shadow-[0_0_15px_rgba(232,121,249,0.3)]">
+              <div className="bg-gradient-to-br from-fuchsia-500 to-purple-600 p-3 rounded-xl text-white shadow-lg group-hover:scale-110 transition-transform"><Zap size={28} strokeWidth={2.5} /></div>
+              <div className="ml-4 text-left"><h2 className="text-xl font-bold text-white">{t.subTitle}</h2><p className="text-sm text-indigo-300">{t.subDesc}</p></div>
+            </button>
 
-                <!-- Obszar Pytania -->
-                <div id="question-container" class="flex-1 flex flex-col items-center justify-center w-full py-8 z-10 transition-opacity duration-300">
-                    <!-- Generowane dynamicznie przez JS -->
-                </div>
-                
-                <p id="question-explanation" class="mt-4 sm:mt-6 text-indigo-300 text-center text-xs sm:text-sm px-4 shrink-0 max-w-[80%] mx-auto font-medium mb-4">
-                    <!-- Wyjaśnienie -->
-                </p>
+            <button onClick={() => startGame('algebra')} className="group flex items-center p-4 bg-slate-800/80 hover:bg-slate-700/80 rounded-2xl transition-all duration-200 border border-slate-600 hover:border-emerald-400 hover:shadow-[0_0_15px_rgba(52,211,153,0.3)]">
+              <div className="bg-gradient-to-br from-emerald-400 to-teal-600 p-3 rounded-xl text-white shadow-lg group-hover:scale-110 transition-transform"><Radar size={28} strokeWidth={2.5} /></div>
+              <div className="ml-4 text-left"><h2 className="text-xl font-bold text-white">{t.algTitle}</h2><p className="text-sm text-indigo-300">{t.algDesc}</p></div>
+            </button>
+
+            <button onClick={() => startGame('sequence')} className="group flex items-center p-4 bg-slate-800/80 hover:bg-slate-700/80 rounded-2xl transition-all duration-200 border border-slate-600 hover:border-cyan-400 hover:shadow-[0_0_15px_rgba(34,211,238,0.3)]">
+              <div className="bg-gradient-to-br from-cyan-400 to-blue-600 p-3 rounded-xl text-white shadow-lg group-hover:scale-110 transition-transform"><Orbit size={28} strokeWidth={2.5} /></div>
+              <div className="ml-4 text-left"><h2 className="text-xl font-bold text-white">{t.seqTitle}</h2><p className="text-sm text-indigo-300">{t.seqDesc}</p></div>
+            </button>
+
+            {/* NOWY TRYB: Kwantowy Komputer */}
+            <button onClick={() => startGame('chain')} className="group flex items-center p-4 bg-slate-800/80 hover:bg-slate-700/80 rounded-2xl transition-all duration-200 border border-slate-600 hover:border-rose-400 hover:shadow-[0_0_15px_rgba(244,63,94,0.3)]">
+              <div className="bg-gradient-to-br from-rose-500 to-pink-600 p-3 rounded-xl text-white shadow-lg group-hover:scale-110 transition-transform"><Cpu size={28} strokeWidth={2.5} /></div>
+              <div className="ml-4 text-left"><h2 className="text-xl font-bold text-white">{t.chainTitle}</h2><p className="text-sm text-indigo-300">{t.chainDesc}</p></div>
+            </button>
+
+            <div className="mt-2 pt-4 border-t border-slate-700/50">
+              <button onClick={() => {
+                setStudentName(activeUser.name);
+                setCurrentScreen('certificate');
+              }} className="w-full flex justify-center items-center gap-2 py-3 bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-500 hover:to-orange-500 text-white rounded-xl font-bold text-md transition-all shadow-[0_0_15px_rgba(234,179,8,0.3)] active:scale-95 border border-yellow-400/50">
+                <Scroll size={20} /> {t.certBtn}
+              </button>
             </div>
 
-            <!-- Numpad -->
-            <div class="bg-slate-800/60 backdrop-blur-md p-2 sm:p-4 pb-4 sm:pb-8 sm:rounded-t-3xl border-t border-slate-700 shrink-0 relative z-10 shadow-[0_-10px_20px_rgba(0,0,0,0.3)]">
-                <div class="grid grid-cols-3 gap-2 sm:gap-3">
-                    <button onclick="handleNumpad(1)" class="numpad-btn bg-slate-700/80 hover:bg-indigo-600/50 text-white text-xl sm:text-3xl font-bold py-3 sm:py-4 rounded-xl sm:rounded-2xl border-b-4 border-slate-900 active:border-b-0 active:translate-y-1 transition-all shadow-[0_4px_6px_rgba(0,0,0,0.3)] hover:shadow-[0_0_15px_rgba(99,102,241,0.4)] hover:text-cyan-300">1</button>
-                    <button onclick="handleNumpad(2)" class="numpad-btn bg-slate-700/80 hover:bg-indigo-600/50 text-white text-xl sm:text-3xl font-bold py-3 sm:py-4 rounded-xl sm:rounded-2xl border-b-4 border-slate-900 active:border-b-0 active:translate-y-1 transition-all shadow-[0_4px_6px_rgba(0,0,0,0.3)] hover:shadow-[0_0_15px_rgba(99,102,241,0.4)] hover:text-cyan-300">2</button>
-                    <button onclick="handleNumpad(3)" class="numpad-btn bg-slate-700/80 hover:bg-indigo-600/50 text-white text-xl sm:text-3xl font-bold py-3 sm:py-4 rounded-xl sm:rounded-2xl border-b-4 border-slate-900 active:border-b-0 active:translate-y-1 transition-all shadow-[0_4px_6px_rgba(0,0,0,0.3)] hover:shadow-[0_0_15px_rgba(99,102,241,0.4)] hover:text-cyan-300">3</button>
-                    <button onclick="handleNumpad(4)" class="numpad-btn bg-slate-700/80 hover:bg-indigo-600/50 text-white text-xl sm:text-3xl font-bold py-3 sm:py-4 rounded-xl sm:rounded-2xl border-b-4 border-slate-900 active:border-b-0 active:translate-y-1 transition-all shadow-[0_4px_6px_rgba(0,0,0,0.3)] hover:shadow-[0_0_15px_rgba(99,102,241,0.4)] hover:text-cyan-300">4</button>
-                    <button onclick="handleNumpad(5)" class="numpad-btn bg-slate-700/80 hover:bg-indigo-600/50 text-white text-xl sm:text-3xl font-bold py-3 sm:py-4 rounded-xl sm:rounded-2xl border-b-4 border-slate-900 active:border-b-0 active:translate-y-1 transition-all shadow-[0_4px_6px_rgba(0,0,0,0.3)] hover:shadow-[0_0_15px_rgba(99,102,241,0.4)] hover:text-cyan-300">5</button>
-                    <button onclick="handleNumpad(6)" class="numpad-btn bg-slate-700/80 hover:bg-indigo-600/50 text-white text-xl sm:text-3xl font-bold py-3 sm:py-4 rounded-xl sm:rounded-2xl border-b-4 border-slate-900 active:border-b-0 active:translate-y-1 transition-all shadow-[0_4px_6px_rgba(0,0,0,0.3)] hover:shadow-[0_0_15px_rgba(99,102,241,0.4)] hover:text-cyan-300">6</button>
-                    <button onclick="handleNumpad(7)" class="numpad-btn bg-slate-700/80 hover:bg-indigo-600/50 text-white text-xl sm:text-3xl font-bold py-3 sm:py-4 rounded-xl sm:rounded-2xl border-b-4 border-slate-900 active:border-b-0 active:translate-y-1 transition-all shadow-[0_4px_6px_rgba(0,0,0,0.3)] hover:shadow-[0_0_15px_rgba(99,102,241,0.4)] hover:text-cyan-300">7</button>
-                    <button onclick="handleNumpad(8)" class="numpad-btn bg-slate-700/80 hover:bg-indigo-600/50 text-white text-xl sm:text-3xl font-bold py-3 sm:py-4 rounded-xl sm:rounded-2xl border-b-4 border-slate-900 active:border-b-0 active:translate-y-1 transition-all shadow-[0_4px_6px_rgba(0,0,0,0.3)] hover:shadow-[0_0_15px_rgba(99,102,241,0.4)] hover:text-cyan-300">8</button>
-                    <button onclick="handleNumpad(9)" class="numpad-btn bg-slate-700/80 hover:bg-indigo-600/50 text-white text-xl sm:text-3xl font-bold py-3 sm:py-4 rounded-xl sm:rounded-2xl border-b-4 border-slate-900 active:border-b-0 active:translate-y-1 transition-all shadow-[0_4px_6px_rgba(0,0,0,0.3)] hover:shadow-[0_0_15px_rgba(99,102,241,0.4)] hover:text-cyan-300">9</button>
-                    
-                    <button onclick="handleBackspace()" class="numpad-btn bg-slate-900/80 hover:bg-red-900/50 text-slate-300 hover:text-red-300 text-xl sm:text-2xl font-bold py-3 sm:py-4 rounded-xl sm:rounded-2xl border-b-4 border-black active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center shadow-[0_4px_6px_rgba(0,0,0,0.5)]">⌫</button>
-                    <button onclick="handleNumpad(0)" class="numpad-btn bg-slate-700/80 hover:bg-indigo-600/50 text-white text-xl sm:text-3xl font-bold py-3 sm:py-4 rounded-xl sm:rounded-2xl border-b-4 border-slate-900 active:border-b-0 active:translate-y-1 transition-all shadow-[0_4px_6px_rgba(0,0,0,0.3)] hover:shadow-[0_0_15px_rgba(99,102,241,0.4)] hover:text-cyan-300">0</button>
-                    <button id="submit-btn" onclick="checkAnswer()" class="numpad-btn bg-gradient-to-b from-emerald-500 to-emerald-700 hover:from-emerald-400 hover:to-emerald-600 text-white text-xl sm:text-2xl font-bold py-3 sm:py-4 rounded-xl sm:rounded-2xl border-b-4 border-emerald-900 active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center shadow-[0_4px_10px_rgba(16,185,129,0.3)] disabled:opacity-50 disabled:from-slate-700 disabled:to-slate-800 disabled:border-slate-900 disabled:text-slate-500 disabled:active:translate-y-0" disabled>OK</button>
-                </div>
-            </div>
+            <div className="mt-2 text-center"><p className="text-xs text-slate-500">{t.author} <span className="text-indigo-400 font-semibold">Mirosław Józef "Miras"</span></p></div>
+          </div>
         </div>
+      </div>
+    );
+  }
 
-        <!-- EKRAN WYNIKÓW -->
-        <div id="result-screen" class="hidden max-w-md w-full bg-slate-800/60 backdrop-blur-md rounded-3xl shadow-2xl p-8 text-center relative overflow-hidden border border-slate-700 z-10 no-print">
-            <i data-lucide="trophy" class="w-20 h-20 mx-auto text-yellow-400 mb-6 drop-shadow-[0_0_15px_rgba(250,204,21,0.6)]"></i>
-            <h2 id="t-missionComplete" class="text-3xl font-extrabold text-white mb-2">Misja Zakończona!</h2>
-            
-            <p class="text-lg text-indigo-200 mb-4">
-                <span id="t-yourScore">Twój wynik to</span> <span id="result-score" class="font-bold text-cyan-400 text-2xl">0</span> / <span id="max-score-display">15</span>
+  // --- EKRAN WYNIKÓW ---
+  if (currentScreen === 'result') {
+    return (
+      <div className="min-h-[100dvh] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900 via-slate-900 to-black flex items-center justify-center p-4 font-sans text-slate-100 relative">
+        <Starfield speedLevel={0} />
+        <div className="max-w-md w-full bg-slate-800/60 backdrop-blur-md rounded-3xl shadow-2xl p-8 text-center relative overflow-hidden border border-slate-700 z-10">
+          
+          <Trophy size={80} className="mx-auto text-yellow-400 mb-6 drop-shadow-[0_0_15px_rgba(250,204,21,0.6)]" />
+          <h2 className="text-3xl font-extrabold text-white mb-2">{t.missionComplete}</h2>
+          
+          <p className="text-lg text-indigo-200 mb-4">
+            {t.yourScore} <span className="font-bold text-cyan-400 text-2xl">{score}</span> / {maxQuestions}
+          </p>
+
+          <div className="bg-black/40 rounded-2xl p-4 mb-6 border border-yellow-500/30 shadow-[inset_0_0_20px_rgba(250,204,21,0.1)]">
+            <p className="text-yellow-400 font-bold mb-1 flex justify-center items-center gap-2">
+              <Coins size={24} /> 
+              {t.coinsEarned} <span className="text-2xl text-yellow-300 drop-shadow-[0_0_5px_rgba(250,204,21,0.8)]">+{sessionCoins}</span>
+            </p>
+          </div>
+          
+          <div className="flex justify-center gap-2 mb-8">
+            {[...Array(maxQuestions)].map((_, i) => (
+              <Star 
+                key={i} 
+                size={32} 
+                className={i < score ? "text-yellow-400 fill-yellow-400 animate-bounce drop-shadow-[0_0_8px_rgba(250,204,21,0.8)]" : "text-slate-700"} 
+                style={i < score ? { animationDelay: `${i * 100}ms` } : {}}
+              />
+            ))}
+          </div>
+
+          <button 
+            onClick={() => setCurrentScreen('menu')}
+            className="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl font-bold text-lg hover:opacity-90 transition-opacity shadow-[0_0_15px_rgba(79,70,229,0.5)] active:scale-95 border border-indigo-400"
+          >
+            {t.backToBase}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // --- EKRAN CERTYFIKATU ---
+  if (currentScreen === 'certificate') {
+    const today = new Date().toLocaleDateString(lang === 'is' ? 'is-IS' : (lang === 'en' ? 'en-US' : 'pl-PL'));
+    
+    return (
+      <div className="min-h-[100dvh] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900 via-slate-900 to-black flex items-center justify-center p-4 font-sans text-slate-100 relative">
+        <PrintStyles />
+        <Starfield speedLevel={0} />
+
+        <div className="max-w-md w-full bg-slate-800/80 backdrop-blur-md rounded-3xl shadow-2xl overflow-hidden border border-slate-700 z-10 no-print">
+          <div className="p-4 border-b border-slate-700 bg-slate-900/50 flex items-center">
+            <button 
+              onClick={() => setCurrentScreen('menu')}
+              className="p-2 text-indigo-300 hover:text-white hover:bg-slate-700 rounded-full transition-colors mr-2"
+            >
+              <ArrowLeft size={24} />
+            </button>
+            <h2 className="text-xl font-bold text-white flex items-center gap-2">
+              <Scroll className="text-yellow-400" /> {t.certCreator}
+            </h2>
+          </div>
+
+          <div className="p-6 space-y-5">
+            <p className="text-indigo-200 text-sm">
+              {t.certInfo}
             </p>
 
-            <div class="bg-black/40 rounded-2xl p-4 mb-6 border border-yellow-500/30 shadow-[inset_0_0_20px_rgba(250,204,21,0.1)]">
-                <p class="text-yellow-400 font-bold mb-1 flex justify-center items-center gap-2">
-                    <i data-lucide="coins" class="w-6 h-6"></i> 
-                    <span id="t-coinsEarned">Zarobione gwiezdne monety:</span> <span class="text-2xl text-yellow-300 drop-shadow-[0_0_5px_rgba(250,204,21,0.8)]">+<span id="result-coins">0</span></span>
-                </p>
-            </div>
-            
-            <div id="result-stars" class="flex justify-center flex-wrap gap-2 mb-8">
-                <!-- Gwiazdki renderowane w JS -->
+            <div className="space-y-4 text-left">
+              <div>
+                <label className="block text-sm font-bold text-slate-300 mb-1">{t.cadetName}</label>
+                <input 
+                  type="text" 
+                  value={studentName}
+                  onChange={(e) => setStudentName(e.target.value)}
+                  className="w-full p-3 rounded-xl bg-slate-900/80 text-white border border-slate-600 focus:border-cyan-400 focus:outline-none focus:ring-1 focus:ring-cyan-400 placeholder-slate-500" 
+                  placeholder={t.placeholderStudent}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-slate-300 mb-1">{t.commanderName}</label>
+                <input 
+                  type="text" 
+                  value={teacherName}
+                  onChange={(e) => setTeacherName(e.target.value)}
+                  className="w-full p-3 rounded-xl bg-slate-900/80 text-white border border-slate-600 focus:border-cyan-400 focus:outline-none focus:ring-1 focus:ring-cyan-400 placeholder-slate-500" 
+                  placeholder={t.placeholderTeacher}
+                />
+              </div>
             </div>
 
-            <button onclick="showScreen('menu-screen')" class="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl font-bold text-lg hover:opacity-90 transition-opacity shadow-[0_0_15px_rgba(79,70,229,0.5)] active:scale-95 border border-indigo-400">
-                <span id="t-backToBase">Wróć do Bazy</span>
+            <div className="bg-slate-900/50 rounded-xl p-4 border border-slate-700">
+              <p className="text-xs text-slate-400 mb-2">{t.certData}</p>
+              <div className="flex justify-between items-center mb-1">
+                <span className="text-slate-300 text-sm">{t.currentRank}</span>
+                <span className={`font-bold ${rankInfo.color}`}>{rankInfo.title}</span>
+              </div>
+              <div className="flex justify-between items-center mb-3">
+                <span className="text-slate-300 text-sm">{t.solvedTasks}</span>
+                <span className="font-bold text-yellow-400">{totalUserSolved}</span>
+              </div>
+              
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 border-t border-slate-700 pt-3">
+                <div className="text-xs text-slate-300">{t.catAdd}: <span className="text-yellow-400 font-bold">{activeUser.sAdd}</span></div>
+                <div className="text-xs text-slate-300">{t.catSub}: <span className="text-yellow-400 font-bold">{activeUser.sSub}</span></div>
+                <div className="text-xs text-slate-300">{t.catAlg}: <span className="text-yellow-400 font-bold">{activeUser.sAlg}</span></div>
+                <div className="text-xs text-slate-300">{t.catSeq}: <span className="text-yellow-400 font-bold">{activeUser.sSeq}</span></div>
+                <div className="text-xs text-slate-300">{t.catChain}: <span className="text-yellow-400 font-bold">{activeUser.sChain || 0}</span></div>
+              </div>
+            </div>
+
+            <button 
+              onClick={handlePrint}
+              className="w-full py-4 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-bold rounded-xl text-lg shadow-[0_0_15px_rgba(16,185,129,0.4)] transition-all active:scale-95 flex justify-center items-center gap-2 border border-emerald-400/50"
+            >
+              <Printer size={24} />
+              {t.printBtn}
             </button>
+            <p className="text-xs text-slate-400 text-center">{t.printTip}</p>
+          </div>
         </div>
 
-        <!-- EKRAN CERTYFIKATU -->
-        <div id="certificate-screen" class="hidden max-w-md w-full bg-slate-800/80 backdrop-blur-md rounded-3xl shadow-2xl overflow-hidden border border-slate-700 z-10 no-print">
-            <div class="p-4 border-b border-slate-700 bg-slate-900/50 flex items-center">
-                <button onclick="showScreen('menu-screen')" class="p-2 text-indigo-300 hover:text-white hover:bg-slate-700 rounded-full transition-colors mr-2">
-                    <i data-lucide="arrow-left" class="w-6 h-6"></i>
-                </button>
-                <h2 class="text-xl font-bold text-white flex items-center gap-2">
-                    <i data-lucide="scroll" class="text-yellow-400 w-5 h-5"></i> <span id="t-certCreator">Kreator Certyfikatu</span>
-                </h2>
+        {/* --- UKRYTY SZABLON DO DRUKU --- */}
+        <div id="diploma-print-area" style={{ display: 'none' }}>
+          <img className="print-bg-img" src="https://images.unsplash.com/photo-1541185933-ef5d8ed016c2?auto=format&fit=crop&w=1200&q=80" alt="Space Rocket" />
+          <div className="print-bg-overlay"></div>
+          <img src="https://upload.wikimedia.org/wikipedia/commons/e/e5/NASA_logo.svg" style={{ width: '120px', marginBottom: '2rem', position: 'absolute', top: '50px', right: '50px', zIndex: '20' }} alt="NASA Logo" />
+
+          <div className="print-diploma-border">
+            <div style={{ textAlign: 'center', marginTop: '2rem', width: '100%', position: 'relative', zIndex: '10' }}>
+              <h1 className="print-title">{t.certWord}</h1>
+              <h2 className="print-subtitle">{t.certSub}</h2>
+              
+              <p className="print-text" style={{ marginTop: '1rem' }}>{t.receives}</p>
+              
+              <div style={{ fontFamily: "'Cinzel', serif", fontSize: '3.5rem', fontWeight: '900', color: '#f8fafc', margin: '0.5rem 0 1rem 0', borderBottom: '2px solid #d4af37', display: 'inline-block', padding: '0 2rem', minWidth: '400px' }}>
+                {studentName || '........................................'}
+              </div>
+
+              <p className="print-text">{t.achievedRank}</p>
+              <div className="print-rank-value">{rankInfo.title}</div>
+              
+              <p className="print-text">{t.solvedCorrectly}</p>
+              <div className="print-solved-value">{totalUserSolved}</div>
+              
+              <div style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '0.9rem', color: '#94a3b8', display: 'flex', gap: '1.5rem', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '1rem' }}>
+                 <div>{t.catAdd}: {activeUser.sAdd}</div>
+                 <div>{t.catSub}: {activeUser.sSub}</div>
+                 <div>{t.catAlg}: {activeUser.sAlg}</div>
+                 <div>{t.catSeq}: {activeUser.sSeq}</div>
+                 <div>{t.catChain}: {activeUser.sChain || 0}</div>
+              </div>
             </div>
 
-            <div class="p-6 space-y-5">
-                <p id="t-certInfo" class="text-indigo-200 text-sm">
-                    Wypełnij dane, aby wygenerować oficjalny Certyfikat Kosmicznej Matematyki z Twoją aktualną rangą i wynikiem!
+            <div className="print-footer">
+              <div style={{ textAlign: 'left', width: '30%' }}>
+                <p className="print-text" style={{ fontWeight: '700', color: '#cbd5e1', margin: '0', fontSize: '0.9rem' }}>
+                  {t.missionDate} <span style={{ color: '#f8fafc' }}>{today}</span>
                 </p>
-
-                <div class="space-y-4 text-left">
-                    <div>
-                        <label id="t-cadetName" class="block text-sm font-bold text-slate-300 mb-1">Imię i Nazwisko Kadeta (Dziecka):</label>
-                        <input id="input-student" type="text" class="w-full p-3 rounded-xl bg-slate-900/80 text-white border border-slate-600 focus:border-cyan-400 focus:outline-none focus:ring-1 focus:ring-cyan-400 placeholder-slate-500" placeholder="np. Jan Kowalski" />
-                    </div>
-                    <div>
-                        <label id="t-commanderName" class="block text-sm font-bold text-slate-300 mb-1">Dowódca misji (Nauczyciel/Rodzic):</label>
-                        <input id="input-teacher" type="text" class="w-full p-3 rounded-xl bg-slate-900/80 text-white border border-slate-600 focus:border-cyan-400 focus:outline-none focus:ring-1 focus:ring-cyan-400 placeholder-slate-500" placeholder="np. mgr Anna Nowak" />
-                    </div>
+                <p className="print-text" style={{ fontSize: '0.7rem', color: '#64748b', textTransform: 'none', margin: '0.5rem 0 0 0' }}>
+                  {t.congrats}
+                </p>
+              </div>
+              
+              <div style={{ textAlign: 'center', width: '40%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end' }}>
+                <div style={{ marginBottom: '1rem' }}>
+                  <svg style={{ width: '140px', height: '140px' }} viewBox="0 0 100 100">
+                    <defs>
+                      <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#bf953f" />
+                        <stop offset="25%" stopColor="#fcf6ba" />
+                        <stop offset="50%" stopColor="#b38728" />
+                        <stop offset="75%" stopColor="#fbf5b7" />
+                        <stop offset="100%" stopColor="#aa771c" />
+                      </linearGradient>
+                    </defs>
+                    <path d="M50 0 L55 15 L70 10 L65 25 L80 25 L75 40 L90 45 L80 55 L90 65 L75 70 L80 85 L65 80 L70 95 L55 90 L50 100 L45 90 L30 95 L35 80 L20 85 L25 70 L10 65 L20 55 L10 45 L25 40 L20 25 L35 25 L30 10 L45 15 Z" fill="url(#goldGradient)" stroke="#fff" strokeWidth="1.5" />
+                    <circle cx="50" cy="50" r="28" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="1.5" strokeDasharray="3,2"/>
+                    <text x="50" y="55" fontFamily="'Cinzel', serif" fontSize="10" fontWeight="900" fill="#5a3c00" textAnchor="middle" letterSpacing="1">OFFICIAL</text>
+                    <text x="50" y="42" fontFamily="'Cinzel', serif" fontSize="20" fontWeight="bold" fill="#5a3c00" textAnchor="middle">★</text>
+                  </svg>
                 </div>
+                <div style={{ borderBottom: '1px solid #d4af37', width: '200px', marginBottom: '0.5rem' }}></div>
+                <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '0.75rem', color: '#d4af37', margin: '0', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: '600' }}>
+                  {t.commander}
+                </p>
+                <p style={{ fontFamily: "'Cinzel', serif", fontSize: '1.1rem', color: '#f8fafc', fontWeight: '700', margin: '0.5rem 0 0 0' }}>
+                  {teacherName || '........................................'}
+                </p>
+              </div>
 
-                <div class="bg-slate-900/50 rounded-xl p-4 border border-slate-700">
-                    <p id="t-certData" class="text-xs text-slate-400 mb-2">Dane na dyplomie:</p>
-                    <div class="flex justify-between items-center mb-1">
-                        <span id="t-currentRank" class="text-slate-300 text-sm">Aktualna Ranga:</span>
-                        <span id="cert-rank-display" class="font-bold">Kadett</span>
-                    </div>
-                    <div class="flex justify-between items-center">
-                        <span id="t-solvedTasks" class="text-slate-300 text-sm">Rozwiązanych zadań ogółem:</span>
-                        <span id="cert-solved-display" class="font-bold text-yellow-400">0</span>
-                    </div>
-                    <div id="cert-breakdown" class="text-xs text-slate-400 mt-2 pt-2 border-t border-slate-700/50 grid grid-cols-2 gap-1">
-                        <!-- Podział zadań wstrzykiwany przez JS -->
-                    </div>
-                </div>
-
-                <button onclick="handlePrint()" class="w-full py-4 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-bold rounded-xl text-lg shadow-[0_0_15px_rgba(16,185,129,0.4)] transition-all active:scale-95 flex justify-center items-center gap-2 border border-emerald-400/50">
-                    <i data-lucide="printer" class="w-6 h-6"></i>
-                    <span id="t-printBtn">DRUKUJ CERTYFIKAT</span>
-                </button>
-                <p id="t-printTip" class="text-xs text-slate-400 text-center">W ustawieniach drukowania pamiętaj włączyć "Drukuj tła / Background graphics"!</p>
+              <div style={{ textAlign: 'right', width: '30%' }}>
+                <div style={{ borderBottom: '1px solid #d4af37', width: '200px', marginLeft: 'auto', marginBottom: '0.5rem' }}></div>
+                <p style={{ fontFamily: "'Montserrat', sans-serif", fontSize: '0.75rem', color: '#d4af37', margin: '0', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: '600' }}>
+                  {t.author}
+                </p>
+                <p style={{ fontFamily: "'Cinzel', serif", fontSize: '1rem', color: '#f8fafc', fontWeight: '700', margin: '0.5rem 0 0 0' }}>
+                  Mirosław Józef "Miras"
+                </p>
+              </div>
             </div>
+          </div>
         </div>
 
-    </div>
+      </div>
+    );
+  }
 
-    <!-- =========================================================
-         SZABLON DO DRUKU (CERTYFIKAT HTML)
-    ========================================================= -->
-    <div id="diploma-print-area" style="display: none;">
-        <img class="print-bg-img" src="https://images.unsplash.com/photo-1541185933-ef5d8ed016c2?auto=format&fit=crop&w=1200&q=80" alt="Space Rocket" />
-        <div class="print-bg-overlay"></div>
-        <img src="https://upload.wikimedia.org/wikipedia/commons/e/e5/NASA_logo.svg" style="width: 120px; margin-bottom: 2rem; position: absolute; top: 50px; right: 50px; z-index: 20;" alt="NASA Logo" />
-
-        <div class="print-diploma-border">
-            <div style="text-align: center; margin-top: 2rem; width: 100%; position: relative; z-index: 10;">
-                <h1 id="p-certWord" class="print-title">CERTYFIKAT</h1>
-                <h2 id="p-certSub" class="print-subtitle">Kosmicznej Matematyki</h2>
-                
-                <p id="p-receives" class="print-text" style="margin-top: 1rem !important;">Otrzymuje:</p>
-                
-                <div id="p-student" style="font-family: 'Cinzel', serif !important; font-size: 3.5rem !important; font-weight: 900 !important; color: #f8fafc !important; margin: 0.5rem 0 1rem 0 !important; border-bottom: 2px solid #d4af37 !important; display: inline-block; padding: 0 2rem !important; min-width: 400px;">
-                    ........................................
-                </div>
-
-                <p id="p-achievedRank" class="print-text">Który(a) uzyskał(a) rangę:</p>
-                <div id="p-rank" class="print-rank-value">Kadett</div>
-                
-                <p id="p-solvedCorrectly" class="print-text">Rozwiązano poprawnie zadań ogółem:</p>
-                <div id="p-solved" class="print-solved-value" style="margin-bottom: 0.2rem !important;">0</div>
-                <div id="p-breakdown" style="font-family: 'Montserrat', sans-serif !important; font-size: 0.9rem !important; color: #94a3b8 !important; display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap; margin-bottom: 1rem;">
-                    <!-- Podział zadań na wydruku wstrzykiwany przez JS -->
-                </div>
-            </div>
-
-            <div class="print-footer">
-                <div style="text-align: left; width: 30%;">
-                    <p class="print-text" style="font-weight: 700; color: #cbd5e1 !important; margin: 0 !important; font-size: 0.9rem !important;">
-                        <span id="p-missionDate">Data misji:</span> <span id="p-date" style="color: #f8fafc !important;"></span>
-                    </p>
-                    <p id="p-congrats" class="print-text" style="font-size: 0.7rem !important; color: #64748b !important; text-transform: none !important; margin: 0.5rem 0 0 0 !important;">
-                        Gratulacje od Dowództwa Galaktyki!
-                    </p>
-                </div>
-                
-                <div style="text-align: center; width: 40%; display: flex; flex-direction: column; align-items: center; justify-content: flex-end;">
-                    <div style="margin-bottom: 1rem;">
-                        <svg style="width: 140px; height: 140px;" viewBox="0 0 100 100">
-                            <defs>
-                                <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" stop-color="#bf953f" />
-                                    <stop offset="25%" stop-color="#fcf6ba" />
-                                    <stop offset="50%" stop-color="#b38728" />
-                                    <stop offset="75%" stop-color="#fbf5b7" />
-                                    <stop offset="100%" stop-color="#aa771c" />
-                                </linearGradient>
-                            </defs>
-                            <path d="M50 0 L55 15 L70 10 L65 25 L80 25 L75 40 L90 45 L80 55 L90 65 L75 70 L80 85 L65 80 L70 95 L55 90 L50 100 L45 90 L30 95 L35 80 L20 85 L25 70 L10 65 L20 55 L10 45 L25 40 L20 25 L35 25 L30 10 L45 15 Z" fill="url(#goldGradient)" stroke="#fff" stroke-width="1.5" />
-                            <circle cx="50" cy="50" r="28" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="1.5" stroke-dasharray="3,2"/>
-                            <text x="50" y="55" font-family="'Cinzel', serif" font-size="10" font-weight="900" fill="#5a3c00" text-anchor="middle" letter-spacing="1">OFFICIAL</text>
-                            <text x="50" y="42" font-family="'Cinzel', serif" font-size="20" font-weight="bold" fill="#5a3c00" text-anchor="middle">★</text>
-                        </svg>
-                    </div>
-                    <div style="border-bottom: 1px solid #d4af37; width: 200px !important; margin-bottom: 0.5rem !important;"></div>
-                    <p id="p-commander" style="font-family: 'Montserrat', sans-serif !important; font-size: 0.75rem !important; color: #d4af37 !important; margin: 0 !important; text-transform: uppercase !important; letter-spacing: 1px !important; font-weight: 600 !important;">
-                        Dowódca misji:
-                    </p>
-                    <p id="p-teacher" style="font-family: 'Cinzel', serif !important; font-size: 1.1rem !important; color: #f8fafc !important; font-weight: 700 !important; margin: 0.5rem 0 0 0 !important;">
-                        ........................................
-                    </p>
-                </div>
-
-                <div style="text-align: right; width: 30%;">
-                    <div style="border-bottom: 1px solid #d4af37; width: 200px !important; margin-left: auto; margin-bottom: 0.5rem !important;"></div>
-                    <p id="p-author" style="font-family: 'Montserrat', sans-serif !important; font-size: 0.75rem !important; color: #d4af37 !important; margin: 0 !important; text-transform: uppercase !important; letter-spacing: 1px !important; font-weight: 600 !important;">
-                        Autor aplikacji:
-                    </p>
-                    <p style="font-family: 'Cinzel', serif !important; font-size: 1rem !important; color: #f8fafc !important; font-weight: 700 !important; margin: 0.5rem 0 0 0 !important;">
-                        Mirosław Józef "Miras"
-                    </p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- SKRYPTY APLIKACJI -->
-    <script>
-        // --- TŁUMACZENIA ---
-        const TRANSLATIONS = {
-            pl: {
-                appTitle: "Kosmiczna Matma", goal: "Cel", coins: "monet",
-                addTitle: "Start Rakiety", addDesc: "Dodawanie dużych liczb",
-                subTitle: "Błyskawica", subDesc: "Kosmiczne odejmowanie",
-                algTitle: "Sygnał X", algDesc: "Znajdź nieznaną wartość",
-                seqTitle: "Orbity i Ciągi", seqDesc: "Odkryj galaktyczną regułę",
-                certBtn: "Generuj Certyfikat", missionComplete: "Misja Zakończona!",
-                yourScore: "Twój wynik to", coinsEarned: "Zarobione gwiezdne monety:",
-                backToBase: "Wróć do Bazy", great: "Świetnie!", correctWas: "Prawidłowo:",
-                comboBroken: "Seria przerwana :(", certCreator: "Kreator Certyfikatu",
-                certInfo: "Wypełnij dane, aby wygenerować oficjalny Certyfikat Kosmicznej Matematyki z Twoją aktualną rangą i wynikiem!",
-                cadetName: "Imię i Nazwisko Kadeta (Dziecka):", placeholderStudent: "np. Jan Kowalski",
-                commanderName: "Dowódca misji (Nauczyciel/Rodzic):", placeholderTeacher: "np. mgr Anna Nowak",
-                certData: "Dane na dyplomie:", currentRank: "Aktualna Ranga:", solvedTasks: "Rozwiązanych zadań ogółem:",
-                printBtn: "DRUKUJ CERTYFIKAT", printTip: 'W ustawieniach drukowania pamiętaj włączyć "Drukuj tła / Background graphics"!',
-                certWord: "CERTYFIKAT", certSub: "Kosmicznej Matematyki", receives: "Otrzymuje:",
-                achievedRank: "Który(a) uzyskał(a) rangę:", solvedCorrectly: "Rozwiązano poprawnie zadań ogółem:",
-                missionDate: "Data misji:", congrats: "Gratulacje od Dowództwa Galaktyki!",
-                commander: "Dowódca misji:", author: "Autor aplikacji:",
-                expAdd: "Pamiętaj o dodawaniu jedności do jedności, dziesiątek do dziesiątek...",
-                expSub: "Jeśli brakuje Ci na górze, \"pożycz\" z rzędu obok!",
-                expAlg: "Znajdź brakujący element galaktycznej układanki (X).",
-                expSeq: "Jaka kosmiczna reguła tutaj działa?", ruleDouble: "Podwój",
-                rank1: "Kosmiczny Kadet", rank2: "Odkrywca Planet", rank3: "Kapitan Galaktyki",
-                rank4: "Mistrz Grawitacji", rank5: "Strażnik Wszechświata",
-                diffEasy: "Łatwy", diffMed: "Średni", diffHard: "Trudny",
-                showHint: "Pokaż podpowiedź",
-                catAdd: "Dodawanie", catSub: "Odejmowanie", catAlg: "Algebra (X)", catSeq: "Ciągi"
-            },
-            is: {
-                appTitle: "Geimstærðfræði", goal: "Markmið", coins: "mynt",
-                addTitle: "Eldflaugaskot", addDesc: "Samlagning stórra talna",
-                subTitle: "Elding", subDesc: "Geimfrádráttur",
-                algTitle: "Merki X", algDesc: "Finndu óþekkt gildi",
-                seqTitle: "Sporbrautir & Raðir", seqDesc: "Uppgötvaðu vetrarbrautarregluna",
-                certBtn: "Búa til Skírteini", missionComplete: "Leiðangri Lokið!",
-                yourScore: "Þín einkunn er", coinsEarned: "Áunnin stjörnumynt:",
-                backToBase: "Aftur í Bækistöð", great: "Frábært!", correctWas: "Rétt svar:",
-                comboBroken: "Röð rofin :(", certCreator: "Skírteinisgerð",
-                certInfo: "Fylltu út gögnin til að búa til opinbert skírteini í Geimstærðfræði með núverandi stöðu og árangri!",
-                cadetName: "Nafn Kadetts (Barnsins):", placeholderStudent: "t.d. Jón Jónsson",
-                commanderName: "Leiðangursstjóri (Kennari/Foreldri):", placeholderTeacher: "t.d. Anna Jónsdóttir",
-                certData: "Gögn á prófskírteini:", currentRank: "Núverandi Staða:", solvedTasks: "Leyst verkefni alls:",
-                printBtn: "PRENTA SKÍRTEINI", printTip: 'Í prentstillingum, mundu að kveikja á "Prenta bakgrunn / Background graphics"!',
-                certWord: "SKÍRTEINI", certSub: "Í Geimstærðfræði", receives: "Veitist:",
-                achievedRank: "Fyrir að ná stöðunni:", solvedCorrectly: "Heildarfjöldi réttra svara:",
-                missionDate: "Dagsetning:", congrats: "Til hamingju frá Geimstjórn!",
-                commander: "Leiðangursstjóri:", author: "Höfundur forrits:",
-                expAdd: "Mundu að leggja saman einingar við einingar, tugi við tugi...",
-                expSub: "Ef þig vantar ofan á, fáðu lánað úr næsta dálki!",
-                expAlg: "Finndu það sem vantar í geimpúslið (X).",
-                expSeq: "Hvaða geimregla á við hér?", ruleDouble: "Tvöfalda",
-                rank1: "Geimkadett", rank2: "Reikistjörnukönnuður", rank3: "Vetrarbrautarkapteinn",
-                rank4: "Þyngdaraflsmeistari", rank5: "Vörður Alheimsins",
-                diffEasy: "Auðvelt", diffMed: "Miðlungs", diffHard: "Erfitt",
-                showHint: "Sýna vísbendingu",
-                catAdd: "Samlagning", catSub: "Frádráttur", catAlg: "Algebru (X)", catSeq: "Raðir"
-            },
-            en: {
-                appTitle: "Space Math", goal: "Goal", coins: "coins",
-                addTitle: "Rocket Launch", addDesc: "Addition of large numbers",
-                subTitle: "Lightning", subDesc: "Space subtraction",
-                algTitle: "Signal X", algDesc: "Find the unknown value",
-                seqTitle: "Orbits & Sequences", seqDesc: "Discover the galactic rule",
-                certBtn: "Generate Certificate", missionComplete: "Mission Complete!",
-                yourScore: "Your score is", coinsEarned: "Star coins earned:",
-                backToBase: "Return to Base", great: "Great!", correctWas: "Correct:",
-                comboBroken: "Combo broken :(", certCreator: "Certificate Maker",
-                certInfo: "Fill in the details to generate an official Space Math Certificate with your current rank and score!",
-                cadetName: "Cadet's Name (Child):", placeholderStudent: "e.g. John Doe",
-                commanderName: "Mission Commander (Teacher/Parent):", placeholderTeacher: "e.g. Mr. Smith",
-                certData: "Diploma data:", currentRank: "Current Rank:", solvedTasks: "Total solved tasks:",
-                printBtn: "PRINT CERTIFICATE", printTip: 'In print settings, remember to enable "Print backgrounds / Background graphics"!',
-                certWord: "CERTIFICATE", certSub: "Of Space Mathematics", receives: "Awarded to:",
-                achievedRank: "Who achieved the rank:", solvedCorrectly: "Total correctly solved tasks:",
-                missionDate: "Mission date:", congrats: "Congratulations from Space Command!",
-                commander: "Mission Commander:", author: "App author:",
-                expAdd: "Remember to add ones to ones, tens to tens...",
-                expSub: "If you lack on top, \"borrow\" from the next column!",
-                expAlg: "Find the missing piece of the galactic puzzle (X).",
-                expSeq: "What space rule applies here?", ruleDouble: "Double",
-                rank1: "Space Cadet", rank2: "Planet Explorer", rank3: "Galaxy Captain",
-                rank4: "Gravity Master", rank5: "Guardian of the Universe",
-                diffEasy: "Easy", diffMed: "Medium", diffHard: "Hard",
-                showHint: "Show hint",
-                catAdd: "Addition", catSub: "Subtraction", catAlg: "Algebra (X)", catSeq: "Sequences"
-            }
-        };
-
-        // --- ZMIENNE STANU ---
-        let lang = localStorage.getItem('spaceMathLang') || 'pl';
-        let totalCoins = parseInt(localStorage.getItem('spaceMathCoins') || '0', 10);
-        let totalSolved = parseInt(localStorage.getItem('spaceMathSolved') || '0', 10);
+  // --- EKRAN GRY ---
+  return (
+    <div className="min-h-[100dvh] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900 via-slate-900 to-black flex flex-col items-center justify-center sm:py-8 sm:px-4 font-sans overflow-y-auto relative text-slate-100">
+      <Starfield speedLevel={score} />
+      
+      <div className="w-full max-w-md md:max-w-4xl bg-slate-900/80 backdrop-blur-md sm:rounded-3xl shadow-2xl shadow-black/50 overflow-hidden flex flex-col min-h-[100dvh] sm:min-h-[500px] sm:h-auto border-x sm:border border-slate-700 z-10 relative">
         
-        let solvedAdd = parseInt(localStorage.getItem('spaceMathSolvedAdd') || '0', 10);
-        let solvedSub = parseInt(localStorage.getItem('spaceMathSolvedSub') || '0', 10);
-        let solvedAlg = parseInt(localStorage.getItem('spaceMathSolvedAlg') || '0', 10);
-        let solvedSeq = parseInt(localStorage.getItem('spaceMathSolvedSeq') || '0', 10);
+        {/* Header - Statystyki w trakcie gry */}
+        <div className="flex justify-between items-center p-4 bg-slate-800/80 border-b border-slate-700 shrink-0">
+          <button 
+            onClick={() => setCurrentScreen('menu')}
+            className="p-2 text-indigo-300 hover:text-white hover:bg-slate-700 rounded-full transition-colors"
+          >
+            <ArrowLeft size={24} />
+          </button>
+          
+          <div className="flex gap-2 items-center">
+            {combo >= 2 && (
+              <div className="flex items-center text-orange-400 bg-orange-900/40 px-3 py-1 rounded-full font-bold text-sm animate-pulse border border-orange-500/50 shadow-[0_0_10px_rgba(249,115,22,0.4)]">
+                <Flame size={16} className="mr-1 fill-orange-500" />
+                Combo x{combo}!
+              </div>
+            )}
+          </div>
 
-        let gameMode = null;
-        let score = 0;
-        let questionCount = 0;
-        let currentQuestion = null;
-        let userAnswer = '';
-        let feedback = null;
-        let isHintVisible = false;
-        let sessionCoins = 0;
-        let combo = 0;
-        let earnedJustNow = 0;
-        const maxQuestions = 15; // Gra trwa teraz 15 rund!
-        let currentDifficulty = parseInt(localStorage.getItem('spaceMathDiff') || '2', 10);
+          <div className="flex gap-4 items-center">
+            <div className="flex items-center text-yellow-400 font-bold bg-black/40 px-3 py-1 rounded-full border border-yellow-500/30 shadow-[0_0_8px_rgba(250,204,21,0.2)]">
+              <Coins size={18} className="mr-1" /> {sessionCoins}
+            </div>
+          </div>
+        </div>
 
-        // --- FUNKCJE POMOCNICZE ---
-        const getRankInfo = (coins, t) => {
-            if (coins < 100) return { title: t.rank1, nextAt: 100, colorClass: 'text-slate-400', icon: 'rocket' };
-            if (coins < 300) return { title: t.rank2, nextAt: 300, colorClass: 'text-emerald-400', icon: 'radar' };
-            if (coins < 600) return { title: t.rank3, nextAt: 600, colorClass: 'text-cyan-400', icon: 'star' };
-            if (coins < 1000) return { title: t.rank4, nextAt: 1000, colorClass: 'text-fuchsia-400', icon: 'orbit' };
-            return { title: t.rank5, nextAt: null, colorClass: 'text-yellow-400', icon: 'crown' };
-        };
+        <div className="w-full bg-slate-800 h-1.5 flex shrink-0">
+          <div 
+            className="bg-gradient-to-r from-cyan-400 to-blue-500 h-full transition-all duration-300 shadow-[0_0_8px_rgba(56,189,248,0.8)]"
+            style={{ width: `${(questionCount / maxQuestions) * 100}%` }}
+          />
+        </div>
 
-        function el(id) { return document.getElementById(id); }
-
-        function setLang(newLang) {
-            lang = newLang;
-            localStorage.setItem('spaceMathLang', lang);
+        {/* Główny kontener - Układ poziomy na PC */}
+        <div className="flex flex-col md:flex-row flex-1 w-full h-full">
+          
+          {/* Lewa strona - Równanie (Question Area) */}
+          <div className="flex-1 flex flex-col relative min-h-[250px] sm:min-h-[300px] md:min-h-[400px] p-4 justify-center">
             
-            // Styl flag
-            ['pl', 'is', 'en'].forEach(l => {
-                const btn = el(`flag-${l}`);
-                if(l === lang) {
-                    btn.classList.add('border-cyan-400', 'scale-110', 'shadow-[0_0_15px_rgba(34,211,238,0.8)]', 'opacity-100');
-                    btn.classList.remove('border-transparent', 'opacity-50');
-                } else {
-                    btn.classList.remove('border-cyan-400', 'scale-110', 'shadow-[0_0_15px_rgba(34,211,238,0.8)]', 'opacity-100');
-                    btn.classList.add('border-transparent', 'opacity-50');
-                }
-            });
+            {/* Feedback Correct/Incorrect */}
+            {feedback === 'correct' && (
+              <div className="absolute top-4 left-0 right-0 flex flex-col items-center z-10 pointer-events-none">
+                <div className="bg-emerald-500/20 backdrop-blur-sm border border-emerald-500/50 text-emerald-300 px-6 py-1.5 sm:py-2 rounded-full font-bold flex items-center shadow-[0_0_15px_rgba(16,185,129,0.3)] mb-1 transform transition-all duration-300 scale-110">
+                  <Check className="mr-2" size={20} /> {t.great}
+                </div>
+                <div className="text-yellow-400 font-extrabold text-lg sm:text-xl animate-bounce drop-shadow-[0_0_8px_rgba(250,204,21,0.8)]">
+                  +{earnedJustNow} 🪙
+                </div>
+              </div>
+            )}
+            {feedback === 'incorrect' && (
+              <div className="absolute top-4 left-0 right-0 flex flex-col items-center z-10 pointer-events-none">
+                <div className="bg-red-500/20 backdrop-blur-sm border border-red-500/50 text-red-300 px-6 py-1.5 sm:py-2 rounded-full font-bold flex items-center shadow-[0_0_15px_rgba(239,68,68,0.3)] transform transition-all duration-300 scale-110">
+                  <XIcon className="mr-2" size={20} /> {t.correctWas} {currentQuestion?.answer}
+                </div>
+                {combo > 0 && <div className="text-slate-400 mt-1 text-xs sm:text-sm">{t.comboBroken}</div>}
+              </div>
+            )}
 
-            const t = TRANSLATIONS[lang];
-            
-            // Aktualizacja tekstów
-            const texts = ['appTitle', 'addTitle', 'addDesc', 'subTitle', 'subDesc', 'algTitle', 'algDesc', 
-                           'seqTitle', 'seqDesc', 'certBtn', 'author', 'missionComplete', 'yourScore', 'coinsEarned', 
-                           'backToBase', 'certCreator', 'certInfo', 'cadetName', 'commanderName', 'certData', 
-                           'currentRank', 'solvedTasks', 'printBtn', 'printTip', 'great', 'correctWas', 'comboBroken',
-                           'certWord', 'certSub', 'receives', 'achievedRank', 'solvedCorrectly', 'missionDate', 
-                           'congrats', 'commander', 'diffEasy', 'diffMed', 'diffHard'];
-            
-            texts.forEach(key => {
-                if(el(`t-${key}`)) el(`t-${key}`).innerText = t[key];
-                if(el(`p-${key}`)) el(`p-${key}`).innerText = t[key]; // Print cert
-            });
+            {/* Obszar równania */}
+            <div className="flex-1 flex flex-col items-center justify-center w-full z-10 overflow-hidden">
+              {currentQuestion?.type === 'column' ? (
+                (() => {
+                  const strA = currentQuestion.a.toString();
+                  const strB = currentQuestion.b.toString();
+                  const ansLen = currentQuestion.answer.toString().length;
+                  const hLen = currentQuestion.hints ? currentQuestion.hints.length : 0;
+                  const cols = Math.max(strA.length, strB.length, ansLen, hLen);
 
-            el('input-student').placeholder = t.placeholderStudent;
-            el('input-teacher').placeholder = t.placeholderTeacher;
-
-            updateMenuUI();
-        }
-
-        // --- ANIMACJA GWIAZD ---
-        function renderStars(speedLevel = 0) {
-            const container = el('starfield');
-            container.innerHTML = '';
-            
-            // Płynne skalowanie prędkości aż do 15 punktów
-            const effectiveSpeed = Math.min(speedLevel, 15);
-            const speedMultiplier = 1 + (effectiveSpeed * 0.35); // Przy 15 pkt prędkość wynosi ok 6x normy
-            const stretch = effectiveSpeed > 0 ? effectiveSpeed * 6 : 0; 
-
-            for(let i=0; i<100; i++) {
-                const angle = Math.random() * 360;
-                const distance = Math.random() * 100 + 50;
-                const size = Math.random() * 2 + 1;
-                const delay = Math.random() * -10;
-                const baseDuration = Math.random() * 4 + 3;
-                const opacity = Math.random() * 0.8 + 0.2;
-                const currentDuration = baseDuration / speedMultiplier;
-
-                const wrapper = document.createElement('div');
-                wrapper.className = 'absolute top-1/2 left-1/2';
-                wrapper.style.transform = `translate(-50%, -50%) rotate(${angle}deg)`;
-
-                const star = document.createElement('div');
-                star.className = 'bg-white rounded-full shadow-[0_0_8px_rgba(255,255,255,0.8)]';
-                star.style.width = `${size}px`;
-                star.style.height = `${size + stretch}px`;
-                star.style.setProperty('--star-opacity', opacity);
-                star.style.setProperty('--star-distance', `${distance}vmax`);
-                star.style.animationName = 'fly-out';
-                star.style.animationDuration = `${currentDuration}s`;
-                star.style.animationTimingFunction = 'ease-in';
-                star.style.animationIterationCount = 'infinite';
-                star.style.animationDelay = `${delay}s`;
-
-                wrapper.appendChild(star);
-                container.appendChild(wrapper);
-            }
-        }
-
-        // --- UI UPDATES ---
-        function setDifficulty(level) {
-            currentDifficulty = level;
-            localStorage.setItem('spaceMathDiff', currentDifficulty);
-            updateMenuUI();
-        }
-
-        function updateMenuUI() {
-            const t = TRANSLATIONS[lang];
-            const rankInfo = getRankInfo(totalCoins, t);
-            
-            el('menu-total-coins').innerText = totalCoins;
-            el('menu-rank-title').innerText = rankInfo.title;
-            
-            el('menu-rank-icon-container').className = `p-1.5 rounded-full bg-slate-800 border border-slate-600 shadow-[0_0_10px_rgba(255,255,255,0.1)] ${rankInfo.colorClass}`;
-            el('menu-rank-icon').setAttribute('data-lucide', rankInfo.icon);
-            
-            // Certyfikat pre-fill
-            el('cert-rank-display').innerText = rankInfo.title;
-            el('cert-rank-display').className = `font-bold ${rankInfo.colorClass}`;
-            el('cert-solved-display').innerText = totalSolved;
-            el('p-rank').innerText = rankInfo.title;
-            el('p-solved').innerText = totalSolved;
-
-            // Wypełnianie rozbicia na dyplomie (UI)
-            let breakdownHtml = `
-                <div>${t.catAdd}: <span class="text-yellow-400 font-bold">${solvedAdd}</span></div>
-                <div>${t.catSub}: <span class="text-yellow-400 font-bold">${solvedSub}</span></div>
-                <div>${t.catAlg}: <span class="text-yellow-400 font-bold">${solvedAlg}</span></div>
-                <div>${t.catSeq}: <span class="text-yellow-400 font-bold">${solvedSeq}</span></div>
-            `;
-            el('cert-breakdown').innerHTML = breakdownHtml;
-
-            // Wypełnianie rozbicia na wygenerowanym wydruku
-            let printBreakdownHtml = `
-                <span>${t.catAdd}: <strong style="color:#d4af37">${solvedAdd}</strong></span>
-                <span>${t.catSub}: <strong style="color:#d4af37">${solvedSub}</strong></span>
-                <span>${t.catAlg}: <strong style="color:#d4af37">${solvedAlg}</strong></span>
-                <span>${t.catSeq}: <strong style="color:#d4af37">${solvedSeq}</strong></span>
-            `;
-            el('p-breakdown').innerHTML = printBreakdownHtml;
-
-            if (rankInfo.nextAt) {
-                el('progress-container').style.display = 'block';
-                const pct = Math.min(100, Math.round((totalCoins / rankInfo.nextAt) * 100));
-                el('t-goal-text').innerText = `${t.goal}: ${rankInfo.nextAt} ${t.coins}`;
-                el('menu-progress-pct').innerText = `${pct}%`;
-                el('menu-progress-bar').style.width = `${pct}%`;
-            } else {
-                el('progress-container').style.display = 'none';
-            }
-
-            // Aktualizacja przycisków trudności
-            [1, 2, 3].forEach(lvl => {
-                const btn = el(`btn-diff-${lvl}`);
-                if (btn) {
-                    if (lvl === currentDifficulty) {
-                        btn.classList.remove('opacity-50', 'border-transparent');
-                        btn.classList.add('bg-slate-700/80', 'border', 'border-slate-600', 'shadow-[0_0_10px_rgba(255,255,255,0.1)]', 'text-white');
-                        btn.style.opacity = '1';
-                    } else {
-                        btn.classList.add('opacity-50', 'border-transparent');
-                        btn.classList.remove('bg-slate-700/80', 'border', 'border-slate-600', 'shadow-[0_0_10px_rgba(255,255,255,0.1)]', 'text-white');
+                  const padA = strA.padStart(cols, ' ').split('');
+                  const padB = strB.padStart(cols, ' ').split('');
+                  const padUser = userAnswer.padStart(cols, ' ').split('');
+                  const padHints = Array(cols).fill(' ');
+                  
+                  if (currentQuestion.hints) {
+                    let diff = cols - hLen;
+                    for (let i = 0; i < hLen; i++) {
+                       padHints[i + diff] = currentQuestion.hints[i];
                     }
-                }
-            });
+                  }
 
-            lucide.createIcons();
-        }
+                  const hintColor = currentQuestion.operator === '+' ? 'text-emerald-400' : 'text-fuchsia-400';
 
-        function showScreen(screenId) {
-            ['menu-screen', 'game-screen', 'result-screen', 'certificate-screen'].forEach(id => {
-                el(id).classList.add('hidden');
-            });
-            el(screenId).classList.remove('hidden');
-            
-            if(screenId === 'menu-screen' || screenId === 'certificate-screen' || screenId === 'result-screen') {
-                renderStars(0);
-                updateMenuUI();
-            }
-        }
+                  return (
+                    <div className={`inline-flex flex-col items-end font-mono text-5xl sm:text-6xl md:text-7xl font-bold text-white leading-none transition-opacity duration-300 ${feedback ? 'opacity-50' : 'opacity-100'}`}>
+                      
+                      {/* Strzałka startowa */}
+                      <div className="flex pr-2 -mb-2 h-8 sm:h-10 w-full justify-end translate-y-3 relative z-20">
+                         {Array(cols).fill(' ').map((_, i) => (
+                            <div key={`arrow-${i}`} className={`w-8 sm:w-12 md:w-16 flex justify-center ${i === cols - 1 && userAnswer.length === 0 ? 'text-yellow-400 animate-bounce opacity-100' : 'opacity-0'}`}>
+                               <ArrowDown className="w-6 h-6 border-2 border-yellow-400 rounded-full p-0.5 bg-yellow-400/20" />
+                            </div>
+                         ))}
+                      </div>
 
-        // --- GENERATORY ZADAŃ ---
-        function generateAddition(t, diff) {
-            let min = 10, max = 50;
-            if(diff === 2) { min = 100; max = 300; }
-            if(diff === 3) { min = 300; max = 999; }
-            const a = Math.floor(Math.random() * (max - min)) + min;
-            const b = Math.floor(Math.random() * (max - min)) + min;
-            
-            // Obliczanie "małych jedynek" (przeniesień)
-            let strA = a.toString();
-            let strB = b.toString();
-            let ansStr = (a + b).toString();
-            let cols = ansStr.length; 
-            
-            let padA = strA.padStart(cols, '0');
-            let padB = strB.padStart(cols, '0');
-            let hintsArr = Array(cols).fill(' ');
-            
-            let carry = 0;
-            for (let i = cols - 1; i >= 0; i--) {
-                let sum = parseInt(padA[i]) + parseInt(padB[i]) + carry;
-                carry = Math.floor(sum / 10);
-                if (carry > 0 && i > 0) {
-                    hintsArr[i - 1] = '1';
-                }
-            }
-            
-            return { type: 'column', a, b, operator: '+', answer: a + b, explanation: t.expAdd, hints: hintsArr };
-        }
+                      {/* Podpowiedzi */}
+                      <div className={`flex mb-1 h-6 sm:h-8 opacity-90 pr-2 ${hintColor} w-full justify-end`}>
+                        {padHints.map((h, i) => (
+                          <div key={`hint-${i}`} className="w-8 sm:w-12 md:w-16 text-center text-xl sm:text-2xl md:text-3xl font-bold">
+                             {h === ' ' ? '\u00A0' : h}
+                          </div>
+                        ))}
+                      </div>
 
-        function generateSubtraction(t, diff) {
-            let minA = 20, maxA = 50, minB = 5, maxB = 20;
-            if(diff === 2) { minA = 100; maxA = 300; minB = 50; maxB = 150; }
-            if(diff === 3) { minA = 500; maxA = 999; minB = 100; maxB = 800; }
-            let a = Math.floor(Math.random() * (maxA - minA)) + minA;
-            let b = Math.floor(Math.random() * (maxB - minB)) + minB;
-            if (b > a) { let temp = a; a = b; b = temp; }
-            
-            // Obliczanie "małych cyfr" (zapożyczeń w odejmowaniu)
-            let strA = a.toString();
-            let strB = b.toString();
-            let cols = strA.length; 
-            
-            let padA = strA.padStart(cols, '0');
-            let padB = strB.padStart(cols, '0');
-            let hintsArr = Array(cols).fill(' ');
-            
-            let topNums = padA.split('').map(Number);
-            let botNums = padB.split('').map(Number);
-            
-            // Symulacja od prawej do lewej, żeby znaleźć gdzie i co pożyczamy
-            for (let i = cols - 1; i >= 0; i--) {
-                if (topNums[i] < botNums[i]) {
-                    let j = i - 1;
-                    while (j >= 0 && topNums[j] === 0) j--; // Szukanie pierwszej nie-zerowej cyfry w lewo
-                    if (j >= 0) {
-                        topNums[j] -= 1;
-                        hintsArr[j] = topNums[j].toString();
-                        for (let k = j + 1; k < i; k++) {
-                            topNums[k] = 9;
-                            hintsArr[k] = '9';
-                        }
-                        topNums[i] += 10;
-                        hintsArr[i] = topNums[i].toString();
-                    }
-                }
-            }
-            
-            return { type: 'column', a, b, operator: '-', answer: a - b, explanation: t.expSub, hints: hintsArr };
-        }
+                      {/* Górna liczba */}
+                      <div className="flex mb-1.5 pr-2 w-full justify-end">
+                        {padA.map((d, i) => {
+                           const crossOut = (padHints[i] !== ' ' && currentQuestion.operator === '-') ? 'line-through text-slate-500 opacity-80 decoration-fuchsia-500 decoration-2' : '';
+                           return (
+                             <div key={`a-${i}`} className={`w-8 sm:w-12 md:w-16 text-center drop-shadow-[0_0_5px_rgba(255,255,255,0.3)] ${crossOut}`}>
+                               {d === ' ' ? '\u00A0' : d}
+                             </div>
+                           );
+                        })}
+                      </div>
 
-        function generateAlgebra(t, diff) {
-            const types = ['x+a=b', 'a+x=b', 'x-a=b'];
-            const type = types[Math.floor(Math.random() * types.length)];
-            let min = 2, max = 10;
-            if(diff === 2) { min = 5; max = 25; }
-            if(diff === 3) { min = 15; max = 80; }
-            const a = Math.floor(Math.random() * (max - min)) + min;
-            const ans = Math.floor(Math.random() * (max - min)) + min; 
-            let qText = '', b = 0, hintText = '';
-            if (type === 'x+a=b') { b = ans + a; qText = `X + ${a} = ${b}`; hintText = `${b} - ${a} = ?`; }
-            else if (type === 'a+x=b') { b = a + ans; qText = `${a} + X = ${b}`; hintText = `${b} - ${a} = ?`; }
-            else { b = ans - a; qText = `X - ${a} = ${b}`; hintText = `${b} + ${a} = ?`; }
-            return { type: 'inline', questionText: qText, answer: ans, explanation: t.expAlg, hintText: hintText };
-        }
-
-        function generateSequence(t, diff) {
-            let minStart = 2, maxStart = 10;
-            let rules = [
-                { name: '+1', op: (x) => x + 1 }, { name: '+2', op: (x) => x + 2 }, { name: '-1', op: (x) => x - 1 }
-            ];
-            
-            if(diff === 2) {
-                minStart = 10; maxStart = 30;
-                rules = [
-                    { name: '+2', op: (x) => x + 2 }, { name: '+5', op: (x) => x + 5 },
-                    { name: '-3', op: (x) => x - 3 }, { name: t.ruleDouble, op: (x) => x * 2 }
-                ];
-            }
-            if(diff === 3) {
-                minStart = 20; maxStart = 100;
-                rules = [
-                    { name: '+12', op: (x) => x + 12 }, { name: '+15', op: (x) => x + 15 },
-                    { name: '-8', op: (x) => x - 8 }, { name: '*3', op: (x) => x * 3 }
-                ];
-            }
-
-            const start = Math.floor(Math.random() * (maxStart - minStart)) + minStart;
-            const rule = rules[Math.floor(Math.random() * rules.length)];
-            const seq = [start, rule.op(start), rule.op(rule.op(start))];
-            return { 
-                type: 'inline', 
-                questionText: `${seq[0]} ➔ ${seq[1]} ➔ ${seq[2]} ➔ ?`, 
-                answer: rule.op(rule.op(rule.op(start))), 
-                explanation: `${t.expSeq} (${rule.name})` 
-            };
-        }
-
-        // --- GRA ---
-        function startGame(mode) {
-            gameMode = mode;
-            score = 0;
-            questionCount = 0;
-            userAnswer = '';
-            feedback = null;
-            isHintVisible = false;
-            combo = 0;
-            sessionCoins = 0;
-            nextQuestion(mode);
-            showScreen('game-screen');
-        }
-
-        function nextQuestion(mode = gameMode) {
-            userAnswer = '';
-            feedback = null;
-            isHintVisible = false;
-            earnedJustNow = 0;
-            const t = TRANSLATIONS[lang];
-            
-            if (mode === 'add') currentQuestion = generateAddition(t, currentDifficulty);
-            if (mode === 'sub') currentQuestion = generateSubtraction(t, currentDifficulty);
-            if (mode === 'algebra') currentQuestion = generateAlgebra(t, currentDifficulty);
-            if (mode === 'sequence') currentQuestion = generateSequence(t, currentDifficulty);
-
-            renderGameUI();
-            renderStars(score);
-        }
-
-        function renderGameUI() {
-            // Header stats
-            el('game-session-coins').innerText = sessionCoins;
-            el('game-progress-bar').style.width = `${(questionCount / maxQuestions) * 100}%`;
-            
-            if(combo >= 2) {
-                el('combo-container').classList.remove('hidden');
-                el('combo-value').innerText = combo;
-            } else {
-                el('combo-container').classList.add('hidden');
-            }
-
-            // Obszar pytania
-            const qCont = el('question-container');
-            const opacityClass = feedback ? 'opacity-50' : 'opacity-100';
-            const pulseClass = feedback ? '' : 'animate-pulse';
-            const displayAns = userAnswer || (feedback ? currentQuestion.answer.toString() : '&nbsp;');
-
-            let html = '';
-            if (currentQuestion.type === 'column') {
-                // Rozdzielanie na pojedyncze cyfry w celu perfekcyjnego ułożenia w kolumnach wraz z podpowiedziami
-                const strA = currentQuestion.a.toString();
-                const strB = currentQuestion.b.toString();
-                const ansLen = currentQuestion.answer.toString().length;
-                const hintsLen = currentQuestion.hints ? currentQuestion.hints.length : 0;
-                const cols = Math.max(strA.length, strB.length, ansLen, hintsLen);
-                
-                const padA = strA.padStart(cols, ' ').split('');
-                const padB = strB.padStart(cols, ' ').split('');
-                const padUser = userAnswer.padStart(cols, ' ').split('');
-                
-                const padHints = Array(cols).fill(' ');
-                if (currentQuestion.hints) {
-                    let diff = cols - currentQuestion.hints.length;
-                    for(let i=0; i<currentQuestion.hints.length; i++) {
-                        padHints[i + diff] = currentQuestion.hints[i];
-                    }
-                }
-
-                const hintColor = currentQuestion.operator === '+' ? 'text-emerald-400' : 'text-fuchsia-400';
-
-                // Strzałka wskazująca, od której strony zacząć (chowa się po wpisaniu pierwszej cyfry)
-                let arrowHtml = Array(cols).fill(' ').map((_, i) => {
-                    if (i === cols - 1) {
-                        const visClass = userAnswer.length === 0 ? 'text-yellow-400 animate-bounce' : 'opacity-0';
-                        return `<div class="w-8 sm:w-12 flex justify-center ${visClass} drop-shadow-[0_0_8px_rgba(250,204,21,0.6)]">
-                            <i data-lucide="arrow-down" class="w-6 h-6 sm:w-8 sm:h-8 border-2 border-yellow-400 rounded-full p-0.5 bg-yellow-400/20"></i>
-                        </div>`;
-                    }
-                    return `<div class="w-8 sm:w-12"></div>`;
-                }).join('');
-
-                // Podpowiedzi na górze
-                let hintsHtml = padHints.map(h => `<div class="w-8 sm:w-12 text-center text-xl sm:text-2xl font-bold tracking-tighter">${h.replace(' ', '&nbsp;')}</div>`).join('');
-                
-                // Główna liczba (przekreślana, jeśli na górze jest podpowiedź zapożyczenia)
-                let aHtml = padA.map((d, i) => {
-                    let crossOut = (padHints[i] !== ' ' && currentQuestion.operator === '-') ? 'line-through text-slate-500 opacity-80 decoration-fuchsia-500 decoration-2' : '';
-                    return `<div class="w-8 sm:w-12 text-center drop-shadow-[0_0_5px_rgba(255,255,255,0.3)] ${crossOut}">${d.replace(' ', '&nbsp;')}</div>`;
-                }).join('');
-                
-                let bHtml = padB.map(d => `<div class="w-8 sm:w-12 text-center drop-shadow-[0_0_5px_rgba(255,255,255,0.3)]">${d.replace(' ', '&nbsp;')}</div>`).join('');
-                let uHtml = padUser.map(d => `<div class="w-8 sm:w-12 text-center drop-shadow-[0_0_8px_rgba(34,211,238,0.5)]">${d.replace(' ', '&nbsp;')}</div>`).join('');
-                
-                let fallbackAns = currentQuestion.answer.toString().padStart(cols, ' ').split('').map(d => `<div class="w-8 sm:w-12 text-center drop-shadow-[0_0_8px_rgba(34,211,238,0.5)]">${d.replace(' ', '&nbsp;')}</div>`).join('');
-
-                html = `
-                <div class="inline-flex flex-col items-end font-mono text-5xl sm:text-6xl font-bold text-white leading-none transition-opacity duration-300 ${opacityClass}">
-                    
-                    <!-- Strzałka startowa -->
-                    <div class="flex pr-2 mb-1 h-8 sm:h-10">
-                        ${arrowHtml}
-                    </div>
-
-                    <!-- Podpowiedzi (małe cyferki / zapożyczenia) -->
-                    <div class="flex ${hintColor} mb-1 h-6 sm:h-8 opacity-90 pr-2">
-                        ${hintsHtml}
-                    </div>
-
-                    <!-- Górna liczba -->
-                    <div class="flex mb-1.5 pr-2">
-                        ${aHtml}
-                    </div>
-
-                    <!-- Operator i dolna liczba -->
-                    <div class="flex items-end mb-1.5 w-full justify-between">
-                        <span class="text-4xl sm:text-5xl text-indigo-400 pb-1">${currentQuestion.operator}</span>
-                        <div class="flex pr-2">
-                            ${bHtml}
+                      {/* Operator i dolna liczba */}
+                      <div className="flex items-end mb-1.5 w-full justify-between">
+                        <span className="text-4xl sm:text-5xl md:text-6xl text-indigo-400 pb-1">{currentQuestion.operator}</span>
+                        <div className="flex pr-2">
+                          {padB.map((d, i) => (
+                             <div key={`b-${i}`} className="w-8 sm:w-12 md:w-16 text-center drop-shadow-[0_0_5px_rgba(255,255,255,0.3)]">
+                               {d === ' ' ? '\u00A0' : d}
+                             </div>
+                          ))}
                         </div>
+                      </div>
+
+                      <div className="border-b-4 sm:border-b-8 border-indigo-500/70 my-1.5 md:my-3 w-full rounded-full shrink-0 shadow-[0_2px_10px_rgba(99,102,241,0.5)]"></div>
+                      
+                      {/* Odpowiedź użytkownika */}
+                      <div className={`flex pr-2 min-h-[1em] mt-1.5 md:mt-3 text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.5)] ${feedback ? '' : 'animate-pulse'}`}>
+                         {(feedback && userAnswer === '') ? (
+                            currentQuestion.answer.toString().padStart(cols, ' ').split('').map((d, i) => (
+                              <div key={`ans-${i}`} className="w-8 sm:w-12 md:w-16 text-center">{d === ' ' ? '\u00A0' : d}</div>
+                            ))
+                         ) : (
+                            padUser.map((d, i) => (
+                              <div key={`u-${i}`} className="w-8 sm:w-12 md:w-16 text-center">{d === ' ' ? '\u00A0' : d}</div>
+                            ))
+                         )}
+                      </div>
                     </div>
-
-                    <!-- Kreska ułamkowa -->
-                    <div class="border-b-4 sm:border-b-8 border-indigo-500/70 my-1.5 w-full rounded-full shadow-[0_2px_10px_rgba(99,102,241,0.5)]"></div>
-
-                    <!-- Odpowiedź gracza -->
-                    <div class="flex mt-1.5 text-cyan-400 pr-2 ${pulseClass} min-h-[1em]">
-                        ${feedback && userAnswer === '' ? fallbackAns : uHtml}
+                  );
+                })()
+              ) : (
+                <div className="flex flex-col items-center justify-center w-full">
+                  <h2 className={`text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold text-white tracking-wider text-center w-full break-words px-4 transition-opacity duration-300 drop-shadow-[0_0_8px_rgba(255,255,255,0.2)] ${feedback ? 'opacity-50' : 'opacity-100'}`}>
+                    {currentQuestion?.questionText?.replace('?', '')}
+                    <span className={`inline-block min-w-[60px] sm:min-w-[80px] md:min-w-[100px] border-b-4 sm:border-b-8 border-indigo-500/70 ml-2 md:ml-4 text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.5)] ${feedback ? '' : 'animate-pulse'}`}>
+                      {userAnswer || (feedback ? currentQuestion.answer : '\u00A0')}
+                    </span>
+                  </h2>
+                  
+                  {/* Podpowiedź (Sygnał X) */}
+                  {currentQuestion?.hintText && (
+                    <div className="mt-6 md:mt-8 min-h-[48px] flex items-center justify-center">
+                      {(isHintVisible || feedback !== null) ? (
+                        <div className="text-emerald-400 text-2xl sm:text-3xl font-bold tracking-widest opacity-90 drop-shadow-[0_0_8px_rgba(52,211,153,0.6)]">
+                          {currentQuestion.hintText}
+                        </div>
+                      ) : (
+                        <button 
+                          onClick={() => setIsHintVisible(true)}
+                          className="flex items-center gap-2 px-5 py-2.5 bg-emerald-900/40 hover:bg-emerald-800/60 text-emerald-400 border border-emerald-500/50 rounded-full text-sm sm:text-base font-bold transition-all shadow-[0_0_10px_rgba(16,185,129,0.2)] active:scale-95"
+                        >
+                          <Lightbulb size={20} /> <span>{t.showHint}</span>
+                        </button>
+                      )}
                     </div>
-                </div>`;
-            } else {
-                const textNoQ = currentQuestion.questionText.replace('?', '');
-                
-                let hintHtml = '';
-                if (currentQuestion.hintText) {
-                    if (isHintVisible || feedback !== null) {
-                        hintHtml = `<div class="mt-4 sm:mt-6 text-emerald-400 text-xl sm:text-2xl font-bold tracking-widest opacity-90 drop-shadow-[0_0_8px_rgba(52,211,153,0.6)]">${currentQuestion.hintText}</div>`;
-                    } else {
-                        const t = TRANSLATIONS[lang];
-                        hintHtml = `
-                        <button onclick="revealHint()" class="mt-4 sm:mt-6 flex items-center gap-2 px-4 py-2 bg-emerald-900/40 hover:bg-emerald-800/60 text-emerald-400 border border-emerald-500/50 rounded-full text-sm font-bold transition-all shadow-[0_0_10px_rgba(16,185,129,0.2)] active:scale-95">
-                            <i data-lucide="lightbulb" class="w-4 h-4"></i> <span>${t.showHint}</span>
-                        </button>`;
-                    }
-                }
-                
-                html = `
-                <div class="flex flex-col items-center justify-center w-full">
-                    <h2 class="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white tracking-wider text-center w-full break-words px-4 transition-opacity duration-300 drop-shadow-[0_0_8px_rgba(255,255,255,0.2)] ${opacityClass}">
-                        ${textNoQ}
-                        <span class="inline-block min-w-[60px] sm:min-w-[80px] border-b-4 border-indigo-500/70 ml-2 text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.5)] ${pulseClass}">
-                            ${displayAns}
-                        </span>
-                    </h2>
-                    ${hintHtml}
-                </div>`;
-            }
-            qCont.innerHTML = html;
-            el('question-explanation').innerText = currentQuestion.explanation;
-
-            // Przyciski
-            const btns = document.querySelectorAll('.numpad-btn');
-            btns.forEach(btn => {
-                btn.disabled = feedback !== null;
-            });
-            el('submit-btn').disabled = (feedback !== null || userAnswer === '');
-
-            lucide.createIcons(); // Re-init icons just in case
-        }
-
-        function handleNumpad(num) {
-            if (feedback) return;
-            if (userAnswer.length < 4) {
-                if (currentQuestion && currentQuestion.type === 'column') {
-                    // Działania pod kreską: dodajemy cyfry od lewej strony (od tyłu)
-                    userAnswer = num.toString() + userAnswer;
-                } else {
-                    // Normalne równania: dodajemy cyfry od prawej strony
-                    userAnswer += num.toString();
-                }
-                renderGameUI();
-            }
-        }
-
-        function handleBackspace() {
-            if (feedback) return;
-            if (userAnswer.length > 0) {
-                if (currentQuestion && currentQuestion.type === 'column') {
-                    // Działania pod kreską: usuwamy ostatnio wpisaną (pierwszą z lewej)
-                    userAnswer = userAnswer.slice(1);
-                } else {
-                    // Normalne równania: usuwamy ostatnią z prawej
-                    userAnswer = userAnswer.slice(0, -1);
-                }
-                renderGameUI();
-            }
-        }
-
-        function revealHint() {
-            if (feedback) return;
-            isHintVisible = true;
-            renderGameUI();
-        }
-
-        function checkAnswer() {
-            if (!userAnswer) return;
+                  )}
+                </div>
+              )}
+            </div>
             
-            const isCorrect = parseInt(userAnswer) === currentQuestion.answer;
-            
-            if (isCorrect) {
-                const comboBonus = combo >= 2 ? 5 : 0;
-                earnedJustNow = (currentDifficulty * 5) + comboBonus;
-                
-                sessionCoins += earnedJustNow;
-                totalCoins += earnedJustNow;
-                totalSolved += 1;
+            <p className="mt-4 text-indigo-300 text-center text-xs sm:text-sm px-4 shrink-0 max-w-[80%] mx-auto font-medium">
+              {currentQuestion?.explanation}
+            </p>
+          </div>
 
-                if (gameMode === 'add') solvedAdd += 1;
-                else if (gameMode === 'sub') solvedSub += 1;
-                else if (gameMode === 'algebra') solvedAlg += 1;
-                else if (gameMode === 'sequence') solvedSeq += 1;
-                
-                localStorage.setItem('spaceMathCoins', totalCoins.toString());
-                localStorage.setItem('spaceMathSolved', totalSolved.toString());
-                localStorage.setItem('spaceMathSolvedAdd', solvedAdd.toString());
-                localStorage.setItem('spaceMathSolvedSub', solvedSub.toString());
-                localStorage.setItem('spaceMathSolvedAlg', solvedAlg.toString());
-                localStorage.setItem('spaceMathSolvedSeq', solvedSeq.toString());
-                
-                feedback = 'correct';
-                score += 1;
-                combo += 1;
-                
-                el('earned-just-now').innerText = earnedJustNow;
-                el('feedback-correct').classList.remove('hidden');
-                
-            } else {
-                feedback = 'incorrect';
-                combo = 0;
-                
-                el('correct-answer-display').innerText = currentQuestion.answer;
-                el('feedback-incorrect').classList.remove('hidden');
-                if(combo > 0) el('combo-broken-msg').classList.remove('hidden');
-            }
+          {/* Prawa strona - Klawiatura numeryczna */}
+          <div className="bg-slate-800/60 backdrop-blur-md p-4 sm:p-6 md:p-8 md:rounded-tl-3xl md:border-l border-t md:border-t-0 border-slate-700 shrink-0 relative z-10 shadow-[0_-10px_20px_rgba(0,0,0,0.3)] md:shadow-[-10px_0_20px_rgba(0,0,0,0.3)] w-full md:w-[350px] lg:w-[420px] flex items-center justify-center">
+            <div className="grid grid-cols-3 gap-2 sm:gap-3 lg:gap-4 w-full">
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(num => (
+                <button 
+                  key={num}
+                  onClick={() => handleNumpadPress(num)}
+                  disabled={feedback !== null}
+                  className="bg-slate-700/80 hover:bg-indigo-600/50 text-white text-xl sm:text-3xl font-bold py-4 sm:py-5 lg:py-6 rounded-xl sm:rounded-2xl border-b-4 border-slate-900 active:border-b-0 active:translate-y-1 transition-all disabled:opacity-50 disabled:active:translate-y-0 shadow-[0_4px_6px_rgba(0,0,0,0.3)] hover:shadow-[0_0_15px_rgba(99,102,241,0.4)] hover:text-cyan-300"
+                >
+                  {num}
+                </button>
+              ))}
+              <button 
+                onClick={handleBackspace}
+                disabled={feedback !== null}
+                className="bg-slate-900/80 hover:bg-red-900/50 text-slate-300 hover:text-red-300 text-xl sm:text-2xl font-bold py-4 sm:py-5 lg:py-6 rounded-xl sm:rounded-2xl border-b-4 border-black active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center disabled:opacity-50 disabled:active:translate-y-0 shadow-[0_4px_6px_rgba(0,0,0,0.5)]"
+              >
+                ⌫
+              </button>
+              <button 
+                onClick={() => handleNumpadPress(0)}
+                disabled={feedback !== null}
+                className="bg-slate-700/80 hover:bg-indigo-600/50 text-white text-xl sm:text-3xl font-bold py-4 sm:py-5 lg:py-6 rounded-xl sm:rounded-2xl border-b-4 border-slate-900 active:border-b-0 active:translate-y-1 transition-all disabled:opacity-50 disabled:active:translate-y-0 shadow-[0_4px_6px_rgba(0,0,0,0.3)] hover:shadow-[0_0_15px_rgba(99,102,241,0.4)] hover:text-cyan-300"
+              >
+                0
+              </button>
+              <button 
+                onClick={checkAnswer}
+                disabled={feedback !== null || userAnswer === ''}
+                className="bg-gradient-to-b from-emerald-500 to-emerald-700 hover:from-emerald-400 hover:to-emerald-600 text-white text-xl sm:text-2xl font-bold py-4 sm:py-5 lg:py-6 rounded-xl sm:rounded-2xl border-b-4 border-emerald-900 active:border-b-0 active:translate-y-1 transition-all flex items-center justify-center disabled:opacity-50 disabled:from-slate-700 disabled:to-slate-800 disabled:border-slate-900 disabled:text-slate-500 disabled:active:translate-y-0 shadow-[0_4px_10px_rgba(16,185,129,0.3)]"
+              >
+                OK
+              </button>
+            </div>
+          </div>
 
-            renderGameUI();
-
-            setTimeout(() => {
-                el('feedback-correct').classList.add('hidden');
-                el('feedback-incorrect').classList.add('hidden');
-                el('combo-broken-msg').classList.add('hidden');
-
-                if (questionCount + 1 >= maxQuestions) {
-                    finishGame();
-                } else {
-                    questionCount++;
-                    nextQuestion();
-                }
-            }, 1800);
-        }
-
-        function finishGame() {
-            el('result-score').innerText = score;
-            el('max-score-display').innerText = maxQuestions;
-            el('result-coins').innerText = sessionCoins;
-            
-            const starsCont = el('result-stars');
-            starsCont.innerHTML = '';
-            for(let i=0; i<maxQuestions; i++) {
-                const isEarned = i < score;
-                const animClass = isEarned ? 'animate-bounce drop-shadow-[0_0_8px_rgba(250,204,21,0.8)]' : '';
-                const colorClass = isEarned ? 'text-yellow-400 fill-yellow-400' : 'text-slate-700';
-                const delay = isEarned ? `animation-delay: ${i*100}ms;` : '';
-                
-                starsCont.innerHTML += `<i data-lucide="star" class="w-8 h-8 ${colorClass} ${animClass}" style="${delay}"></i>`;
-            }
-            showScreen('result-screen');
-            lucide.createIcons();
-        }
-
-        // --- DRUKOWANIE ---
-        function handlePrint() {
-            let uczen = el('input-student').value.trim();
-            let nauczyciel = el('input-teacher').value.trim();
-
-            if (uczen === "") uczen = "........................................";
-            if (nauczyciel === "") nauczyciel = "........................................";
-
-            el('p-student').innerText = uczen;
-            el('p-teacher').innerText = nauczyciel;
-            
-            // Formatowanie daty na podstawie wybranego języka
-            let locale = lang === 'is' ? 'is-IS' : (lang === 'en' ? 'en-US' : 'pl-PL');
-            el('p-date').innerText = new Date().toLocaleDateString(locale);
-
-            const printArea = el('diploma-print-area');
-            printArea.style.display = 'block';
-            window.print();
-            printArea.style.display = 'none';
-        }
-
-        // --- INIT ---
-        document.addEventListener('DOMContentLoaded', () => {
-            setLang(lang); // Ustawia język z localStorage i odpala UI
-            renderStars(0);
-            lucide.createIcons();
-        });
-
-    </script>
-</body>
-</html>
+        </div>
+      </div>
+    </div>
+  );
+}

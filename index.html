@@ -81,6 +81,56 @@
         </div>
     </div>
 
+    <!-- MODAL INSTRUKCJI DZIELENIA -->
+    <div id="tutorial-modal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 modal-overlay">
+        <div class="bg-slate-900 border-2 border-violet-500/50 rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-[0_0_50px_rgba(139,92,246,0.3)] relative overflow-hidden">
+            <button onclick="closeTutorialModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors"><i data-lucide="x" class="w-6 h-6"></i></button>
+            
+            <h3 class="text-2xl sm:text-3xl font-black text-white mb-4 flex items-center gap-3 drop-shadow-md">
+                <div class="p-2 bg-violet-600/20 rounded-xl"><i data-lucide="graduation-cap" class="text-violet-400 w-7 h-7"></i></div> 
+                <span id="t-tutTitle">Krótkie Dzielenie</span>
+            </h3>
+            
+            <div class="space-y-4 text-sm sm:text-base text-slate-300">
+                <p id="t-tutP1" class="font-medium text-indigo-200">Oto jak szybko dzielić (metoda z małą resztą):</p>
+                
+                <!-- Wizualizacja -->
+                <div class="bg-slate-800/80 p-4 rounded-2xl font-mono text-3xl sm:text-4xl text-center border border-slate-700 relative shadow-inner flex flex-col items-center overflow-x-auto">
+                    <div class="flex items-end leading-none">
+                        <div class="flex flex-col items-end">
+                            <div class="flex text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.5)] font-bold mb-2">
+                                <div class="w-8 sm:w-12 md:w-16"></div><div class="w-8 sm:w-12 md:w-16 text-center">2</div><div class="w-8 sm:w-12 md:w-16 text-center">1</div>
+                            </div>
+                            <div class="border-t-4 sm:border-t-8 border-violet-500 w-full rounded-full shadow-[0_2px_10px_rgba(139,92,246,0.8)] mb-2 md:mb-4"></div>
+                            <div class="flex font-bold">
+                                <div class="w-8 sm:w-12 md:w-16 text-white text-center">7</div>
+                                <div class="w-8 sm:w-12 md:w-16 text-white text-center">1</div>
+                                <div class="relative w-8 sm:w-12 md:w-16 text-white text-center"><span class="absolute -left-2 sm:-left-3 top-0 sm:-top-1 text-violet-400 text-lg sm:text-xl font-bold drop-shadow-[0_0_5px_rgba(139,92,246,0.8)]">3</span>4</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center mb-0 ml-2 sm:ml-4">
+                            <div class="text-violet-400 mr-2 sm:mr-4 drop-shadow-[0_0_5px_rgba(139,92,246,0.8)] pb-1 sm:pb-2">:</div>
+                            <div class="text-white font-bold drop-shadow-[0_0_5px_rgba(255,255,255,0.3)]">34</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <ol class="list-decimal pl-5 space-y-3 mt-4 text-slate-300 marker:text-violet-400 marker:font-bold">
+                    <li id="t-tutL1">Ile razy <span class="text-white font-bold">34</span> mieści się w <span class="text-white font-bold">7</span>? Ani razu. Bierzemy więc dwie cyfry: <span class="text-white font-bold">71</span>.</li>
+                    <li id="t-tutL2">Ile razy <span class="text-white font-bold">34</span> mieści się w <span class="text-white font-bold">71</span>? Mieści się <span class="text-cyan-400 font-bold">2</span> razy (bo 34×2=68). Piszemy <span class="text-cyan-400 font-bold">2</span> na górze.</li>
+                    <li id="t-tutL3">Zostaje nam <span class="text-violet-400 font-bold">3</span> reszty (71 - 68 = 3). Zapisujemy małą trójkę przed kolejną cyfrą, tworząc <span class="text-white font-bold">34</span>.</li>
+                    <li id="t-tutL4">Ile razy <span class="text-white font-bold">34</span> mieści się w <span class="text-white font-bold">34</span>? Dokładnie <span class="text-cyan-400 font-bold">1</span> raz. Piszemy <span class="text-cyan-400 font-bold">1</span> na górze.</li>
+                </ol>
+                
+                <div class="mt-6 pt-4 border-t border-slate-700/50 text-center">
+                    <button onclick="closeTutorialModal()" class="w-full sm:w-auto px-10 py-3 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white font-bold rounded-xl transition-all shadow-[0_0_15px_rgba(139,92,246,0.4)] active:scale-95 flex items-center justify-center gap-2 mx-auto">
+                        <i data-lucide="check" class="w-5 h-5"></i> <span id="t-tutBtn">Rozumiem!</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="min-h-[100dvh] flex flex-col items-center justify-center p-4 relative z-10 w-full">
         
         <!-- EKRAN WYBORU PROFILU -->
@@ -158,6 +208,16 @@
                     <div class="bg-gradient-to-br from-fuchsia-500 to-purple-600 p-3 rounded-xl text-white shadow-lg group-hover:scale-110 transition-transform"><i data-lucide="zap" class="w-7 h-7"></i></div>
                     <div class="ml-4 text-left"><h2 id="t-subTitle" class="text-xl font-bold text-white">...</h2><p id="t-subDesc" class="text-sm text-indigo-300">...</p></div>
                 </button>
+                
+                <button onclick="startGame('mult')" class="group flex items-center p-4 bg-slate-800/80 hover:bg-slate-700/80 rounded-2xl transition-all duration-200 border border-slate-600 hover:border-amber-400 w-full shadow-lg hover:shadow-[0_0_15px_rgba(251,191,36,0.3)]">
+                    <div class="bg-gradient-to-br from-amber-500 to-yellow-600 p-3 rounded-xl text-white shadow-lg group-hover:scale-110 transition-transform"><i data-lucide="asterisk" class="w-7 h-7"></i></div>
+                    <div class="ml-4 text-left"><h2 id="t-multTitle" class="text-xl font-bold text-white">...</h2><p id="t-multDesc" class="text-sm text-indigo-300">...</p></div>
+                </button>
+
+                <button onclick="startGame('div')" class="group flex items-center p-4 bg-slate-800/80 hover:bg-slate-700/80 rounded-2xl transition-all duration-200 border border-slate-600 hover:border-violet-400 w-full shadow-lg hover:shadow-[0_0_15px_rgba(139,92,246,0.3)]">
+                    <div class="bg-gradient-to-br from-violet-500 to-purple-800 p-3 rounded-xl text-white shadow-lg group-hover:scale-110 transition-transform"><i data-lucide="divide" class="w-7 h-7"></i></div>
+                    <div class="ml-4 text-left"><h2 id="t-divTitle" class="text-xl font-bold text-white">...</h2><p id="t-divDesc" class="text-sm text-indigo-300">...</p></div>
+                </button>
 
                 <button onclick="startGame('algebra')" class="group flex items-center p-4 bg-slate-800/80 hover:bg-slate-700/80 rounded-2xl transition-all duration-200 border border-slate-600 hover:border-emerald-400 w-full shadow-lg hover:shadow-[0_0_15px_rgba(52,211,153,0.3)]">
                     <div class="bg-gradient-to-br from-emerald-400 to-teal-600 p-3 rounded-xl text-white shadow-lg group-hover:scale-110 transition-transform"><i data-lucide="radar" class="w-7 h-7"></i></div>
@@ -169,7 +229,6 @@
                     <div class="ml-4 text-left"><h2 id="t-seqTitle" class="text-xl font-bold text-white">...</h2><p id="t-seqDesc" class="text-sm text-indigo-300">...</p></div>
                 </button>
 
-                <!-- NOWY TRYB -->
                 <button onclick="startGame('chain')" class="group flex items-center p-4 bg-slate-800/80 hover:bg-slate-700/80 rounded-2xl transition-all duration-200 border border-slate-600 hover:border-rose-400 w-full shadow-lg hover:shadow-[0_0_15px_rgba(244,63,94,0.3)]">
                     <div class="bg-gradient-to-br from-rose-500 to-pink-600 p-3 rounded-xl text-white shadow-lg group-hover:scale-110 transition-transform"><i data-lucide="cpu" class="w-7 h-7"></i></div>
                     <div class="ml-4 text-left"><h2 id="t-chainTitle" class="text-xl font-bold text-white">...</h2><p id="t-chainDesc" class="text-sm text-indigo-300">...</p></div>
@@ -187,10 +246,22 @@
 
         <!-- EKRAN GRY -->
         <div id="game-screen" class="hidden w-full max-w-md md:max-w-4xl bg-slate-900/80 backdrop-blur-md sm:rounded-3xl shadow-2xl shadow-black/50 overflow-hidden flex flex-col min-h-[100dvh] sm:min-h-[500px] sm:h-auto border-x sm:border border-slate-700 z-10 relative no-print transition-opacity duration-300">
-            
+
             <!-- Nagłówek Gry -->
             <div class="flex justify-between items-center p-4 bg-slate-800/80 border-b border-slate-700 shrink-0">
-                <button onclick="showScreen('menu-screen')" class="p-2 text-indigo-300 hover:text-white hover:bg-slate-700 rounded-full transition-colors"><i data-lucide="arrow-left" class="w-6 h-6"></i></button>
+                <div class="flex items-center gap-2">
+                    <button onclick="showScreen('menu-screen')" class="p-2 text-indigo-300 hover:text-white hover:bg-slate-700 rounded-full transition-colors"><i data-lucide="arrow-left" class="w-6 h-6"></i></button>
+                    <!-- Przycisk do wyłączania/włączania ułatwień wizualnych -->
+                    <button onclick="toggleVisualHelpers()" class="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800/50 hover:bg-slate-700 text-indigo-300 hover:text-amber-300 rounded-full border border-slate-600/50 transition-colors" title="Włącz/wyłącz ułatwienia wizualne">
+                        <i id="helpers-icon" data-lucide="eye" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+                        <span id="t-helpersToggle" class="text-[10px] sm:text-xs font-bold uppercase tracking-wider">...</span>
+                    </button>
+                    <!-- Przycisk Instrukcji (widoczny tylko w trybie Dzielenia) -->
+                    <button id="tutorial-btn" onclick="openTutorialModal()" class="hidden flex items-center gap-1.5 px-3 py-1.5 bg-violet-900/40 hover:bg-violet-800/60 text-violet-300 hover:text-violet-100 rounded-full border border-violet-500/50 transition-colors shadow-[0_0_8px_rgba(139,92,246,0.3)]">
+                        <i data-lucide="graduation-cap" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+                        <span id="t-tutHeaderBtn" class="text-[10px] sm:text-xs font-bold uppercase tracking-wider">Instrukcja</span>
+                    </button>
+                </div>
                 
                 <div id="combo-container" class="hidden flex items-center text-orange-400 bg-orange-900/40 px-3 py-1 rounded-full font-bold text-sm animate-pulse border border-orange-500/50 shadow-[0_0_10px_rgba(249,115,22,0.4)]">
                     <i data-lucide="flame" class="w-4 h-4 mr-1 fill-orange-500"></i>Combo x<span id="combo-value">2</span>!
@@ -207,7 +278,7 @@
                 <div id="game-progress-bar" class="bg-gradient-to-r from-cyan-400 to-blue-500 h-full transition-all duration-300 shadow-[0_0_8px_rgba(56,189,248,0.8)]" style="width: 0%;"></div>
             </div>
             
-            <!-- Główny kontener - Układ poziomy na PC -->
+            <!-- Główny kontener -->
             <div class="flex flex-col md:flex-row flex-1 w-full h-full">
                 
                 <!-- Lewa strona - Równanie -->
@@ -356,6 +427,8 @@
                 appTitle: "Kosmiczna Matma", goal: "Cel", coins: "monet", 
                 addTitle: "Start Rakiety", addDesc: "Dodawanie dużych liczb",
                 subTitle: "Błyskawica", subDesc: "Kosmiczne odejmowanie",
+                multTitle: "Deszcz Asteroid", multDesc: "Kosmiczne mnożenie",
+                divTitle: "Czarna Dziura", divDesc: "Krótkie dzielenie",
                 algTitle: "Sygnał X", algDesc: "Znajdź nieznaną wartość",
                 seqTitle: "Orbity i Ciągi", seqDesc: "Odkryj galaktyczną regułę",
                 chainTitle: "Kwantowy Komputer", chainDesc: "Łańcuchy działań",
@@ -376,22 +449,41 @@
                 author: "Autor aplikacji:",
                 expAdd: "Pamiętaj o dodawaniu jedności do jedności, dziesiątek do dziesiątek...",
                 expSub: "Jeśli brakuje Ci na górze, \"pożycz\" z rzędu obok!",
+                expMult: "Mnożymy od prawej do lewej. Pamiętaj o jedynkach w pamięci!",
+                expDiv: "Pamiętaj: mała cyfra to reszta z poprzedniego kroku. Połącz ją z kolejną cyfrą dzielnej!",
                 expAlg: "Znajdź brakujący element galaktycznej układanki (X).",
                 expSeq: "Jaka kosmiczna reguła tutaj działa?",
                 expChain: "Pamiętaj o kolejności wykonywania działań! Najpierw mnożenie, potem dodawanie i odejmowanie.",
+                expLongMult: "Mnożenie wielocyfrowe: pomnóż przez jedności, potem przez dziesiątki i dodaj!",
+                longMultHint: "Zsumuj częściowe wyniki!",
                 ruleDouble: "Podwój",
                 rank1: "Kosmiczny Kadet", rank2: "Odkrywca Planet", rank3: "Kapitan Galaktyki",
                 rank4: "Mistrz Grawitacji", rank5: "Strażnik Wszechświata",
                 diffEasy: "Łatwy", diffMed: "Średni", diffHard: "Trudny",
-                catAdd: "Dodawanie", catSub: "Odejmowanie", catAlg: "Algebra (X)", catSeq: "Ciągi", catChain: "Łańcuchy",
+                catAdd: "Dodawanie", catSub: "Odejmowanie", catMult: "Mnożenie", catDiv: "Dzielenie", catAlg: "Algebra (X)", catSeq: "Ciągi", catChain: "Łańcuchy",
                 selectPilot: "WYBIERZ PILOTA", emptyName: "Wpisz imię...", pilot: "PILOT", addPilot: "DODAJ PILOTA",
                 resetConfirmTitle: "Czy na pewno?", resetConfirmDesc: "To działanie jest nieodwracalne. Czy kontynuować?",
-                resetYes: "Tak", resetNo: "Nie", showHint: "Pokaż podpowiedź"
+                resetYes: "Tak", resetNo: "Nie", showHint: "Pokaż podpowiedź",
+                multiplesHint: "Ściąga (Wielokrotności)",
+                helpersToggle: "Ułatwienia",
+                tutHeaderBtn: "Instrukcja",
+                tutTitle: "Krótkie Dzielenie",
+                tutP1: "Oto jak szybko dzielić (metoda z małą resztą):",
+                tutL1: "Ile razy 34 mieści się w 7? Ani razu. Bierzemy więc dwie cyfry: 71.",
+                tutL2: "Ile razy 34 mieści się w 71? Mieści się 2 razy (bo 34×2=68). Piszemy 2 na górze.",
+                tutL3: "Zostaje nam 3 reszty (71 - 68 = 3). Zapisujemy małą trójkę przed kolejną cyfrą, tworząc 34.",
+                tutL4: "Ile razy 34 mieści się w 34? Dokładnie 1 raz. Piszemy 1 na górze.",
+                tutBtn: "Rozumiem!",
+                longStep1: "Krok 1: Pomnóż górną liczbę przez cyfrę jedności z dołu.",
+                longStep2: "Krok 2: Pomnóż przez dziesiątki (dopisz 0 na końcu!)",
+                longStepSum: "Teraz dodaj oba wyniki do siebie!"
             },
             is: {
                 appTitle: "Geimstærðfræði", goal: "Markmið", coins: "mynt", 
                 addTitle: "Eldflaugaskot", addDesc: "Samlagning stórra talna",
                 subTitle: "Elding", subDesc: "Geimfrádráttur",
+                multTitle: "Smástirnaregn", multDesc: "Geimmargföldun",
+                divTitle: "Svarthol", divDesc: "Hröð deiling",
                 algTitle: "Merki X", algDesc: "Finndu óþekkt gildi",
                 seqTitle: "Sporbrautir & Raðir", seqDesc: "Uppgötvaðu vetrarbrautarregluna",
                 chainTitle: "Skammtatölva", chainDesc: "Aðgerðakeðjur",
@@ -412,22 +504,41 @@
                 author: "Höfundur forrits:",
                 expAdd: "Mundu að leggja saman einingar við einingar, tugi við tugi...",
                 expSub: "Ef þig vantar ofan á, fáðu lánað úr næsta dálki!",
+                expMult: "Margfaldaðu frá hægri til vinstri. Mundu eftir tölunum í minni!",
+                expDiv: "Litla talan er afgangur úr fyrra skrefi. Bættu henni við næstu tölu!",
                 expAlg: "Finndu það sem vantar í geimpúslið (X).",
                 expSeq: "Hvaða geimregla á við hér?",
                 expChain: "Mundu eftir röð aðgerða! Margföldun fyrst, síðan samlagning og frádráttur.",
+                expLongMult: "Löng margföldun: margfaldaðu og leggðu saman!",
+                longMultHint: "Leggðu saman hlutaniðurstöðurnar!",
                 ruleDouble: "Tvöfalda",
                 rank1: "Geimkadett", rank2: "Reikistjörnukönnuður", rank3: "Vetrarbrautarkapteinn",
                 rank4: "Þyngdaraflsmeistari", rank5: "Vörður Alheimsins",
                 diffEasy: "Auðvelt", diffMed: "Miðlungs", diffHard: "Erfitt",
-                catAdd: "Samlagning", catSub: "Frádráttur", catAlg: "Algebru (X)", catSeq: "Raðir", catChain: "Keðjur",
+                catAdd: "Samlagning", catSub: "Frádráttur", catMult: "Margföldun", catDiv: "Deiling", catAlg: "Algebru (X)", catSeq: "Raðir", catChain: "Keðjur",
                 selectPilot: "VELDU FLUGMANN", emptyName: "Skrifaðu nafn...", pilot: "FLUGMAÐUR", addPilot: "BÆTA VIÐ",
                 resetConfirmTitle: "Ertu viss?", resetConfirmDesc: "Þú munt missa allan árangur. Viltu halda áfram?",
-                resetYes: "Já", resetNo: "Nei", showHint: "Sýna vísbendingu"
+                resetYes: "Já", resetNo: "Nei", showHint: "Sýna vísbendingu",
+                multiplesHint: "Svindlblað (Margfeldi)",
+                helpersToggle: "Aðstoð",
+                tutHeaderBtn: "Leiðbeiningar",
+                tutTitle: "Stutt deiling",
+                tutP1: "Svona deilirðu hratt (aðferð með lítilli afgangstölu):",
+                tutL1: "Hversu oft gengur 34 upp í 7? Núll. Þannig að við tökum tvo tölustafi: 71.",
+                tutL2: "Hversu oft gengur 34 upp í 71? Það gengur 2 sinnum (því 34×2=68). Við skrifum 2 uppi.",
+                tutL3: "Við erum með 3 í afgang (71 - 68 = 3). Við skrifum litla 3 fyrir framan næsta staf, sem verður 34.",
+                tutL4: "Hversu oft gengur 34 upp í 34? Nákvæmlega 1 sinni. Við skrifum 1 uppi.",
+                tutBtn: "Ég skil!",
+                longStep1: "Skref 1: Margfaldaðu með einingunni.",
+                longStep2: "Skref 2: Margfaldaðu með tugnum (bættu við 0!)",
+                longStepSum: "Leggðu saman niðurstöðurnar!"
             },
             en: {
                 appTitle: "Space Math", goal: "Goal", coins: "coins", 
                 addTitle: "Rocket Launch", addDesc: "Addition of large numbers",
                 subTitle: "Lightning", subDesc: "Space subtraction",
+                multTitle: "Asteroid Rain", multDesc: "Space multiplication",
+                divTitle: "Black Hole", divDesc: "Short division",
                 algTitle: "Signal X", algDesc: "Find the unknown value",
                 seqTitle: "Orbits & Sequences", seqDesc: "Discover the galactic rule",
                 chainTitle: "Quantum Computer", chainDesc: "Chains of operations",
@@ -447,25 +558,43 @@
                 congrats: "Congratulations from Space Command!", commander: "Mission Commander:",
                 author: "App author:",
                 expAdd: "Start adding from the right!", expSub: "Borrow if you lack on top!",
+                expMult: "Multiply from right to left. Remember to add the carried over numbers!",
+                expDiv: "The small number is the remainder from the previous step. Combine it with the next digit!",
                 expAlg: "Find the missing piece of the galactic puzzle (X).",
                 expSeq: "What space rule applies here?",
                 expChain: "Remember the order of operations! Multiplication first, then addition and subtraction.",
+                expLongMult: "Long multiplication: multiply and add!",
+                longMultHint: "Sum the partial results!",
                 ruleDouble: "Double",
                 rank1: "Space Cadet", rank2: "Planet Explorer", rank3: "Galaxy Captain",
                 rank4: "Gravity Master", rank5: "Guardian of the Universe",
                 diffEasy: "Easy", diffMed: "Medium", diffHard: "Hard",
-                catAdd: "Addition", catSub: "Subtraction", catAlg: "Algebra (X)", catSeq: "Sequences", catChain: "Chains",
+                catAdd: "Addition", catSub: "Subtraction", catMult: "Multiplication", catDiv: "Division", catAlg: "Algebra (X)", catSeq: "Sequences", catChain: "Chains",
                 selectPilot: "SELECT PILOT", emptyName: "Enter name...", pilot: "PILOT", addPilot: "ADD PILOT",
                 resetConfirmTitle: "Are you sure?", resetConfirmDesc: "This will delete all progress. Continue?",
-                resetYes: "Yes", resetNo: "No", showHint: "Show hint"
+                resetYes: "Yes", resetNo: "No", showHint: "Show hint",
+                multiplesHint: "Cheat sheet (Multiples)",
+                helpersToggle: "Helpers",
+                tutHeaderBtn: "Tutorial",
+                tutTitle: "Short Division",
+                tutP1: "Here's how to divide quickly (small remainder method):",
+                tutL1: "How many times does 34 fit into 7? Zero. So we take two digits: 71.",
+                tutL2: "How many times does 34 fit into 71? It fits 2 times (because 34×2=68). We write 2 on top.",
+                tutL3: "We have 3 remainder left (71 - 68 = 3). We write the small 3 before the next digit, making it 34.",
+                tutL4: "How many times does 34 fit into 34? Exactly 1 time. We write 1 on top.",
+                tutBtn: "I got it!",
+                longStep1: "Step 1: Multiply by the ones digit.",
+                longStep2: "Step 2: Multiply by the tens digit (add a 0!)",
+                longStepSum: "Add both results together!"
             }
         };
 
         // --- ZMIENNE GLOBALNE ---
         let lang = localStorage.getItem('spaceMathLang') || 'pl';
-        let users = JSON.parse(localStorage.getItem('spaceMath_v3_users')) || [{ name: '', coins: 0, sAdd: 0, sSub: 0, sAlg: 0, sSeq: 0, sChain: 0 }];
-        let activeIdx = parseInt(localStorage.getItem('spaceMath_v3_activeIdx') || '-1');
+        let users = JSON.parse(localStorage.getItem('spaceMath_v5_users')) || [{ name: '', coins: 0, sAdd: 0, sSub: 0, sMult: 0, sDiv: 0, sAlg: 0, sSeq: 0, sChain: 0 }];
+        let activeIdx = parseInt(localStorage.getItem('spaceMath_v5_activeIdx') || '-1');
         let resetTarget = null;
+        let showVisualHelpers = localStorage.getItem('spaceMathHelpers') !== 'false';
 
         let gameMode = null;
         let score = 0;
@@ -484,11 +613,27 @@
         function el(id) { return document.getElementById(id); }
 
         function saveUsers() {
-            localStorage.setItem('spaceMath_v3_users', JSON.stringify(users));
+            localStorage.setItem('spaceMath_v5_users', JSON.stringify(users));
         }
 
         function handleLanguageChange(newLang) {
             setLang(newLang);
+        }
+
+        function openTutorialModal() {
+            const modal = el('tutorial-modal');
+            if (modal) modal.classList.remove('hidden');
+        }
+
+        function closeTutorialModal() {
+            const modal = el('tutorial-modal');
+            if (modal) modal.classList.add('hidden');
+        }
+
+        function toggleVisualHelpers() {
+            showVisualHelpers = !showVisualHelpers;
+            localStorage.setItem('spaceMathHelpers', showVisualHelpers);
+            renderGameUI();
         }
 
         function setLang(newLang) {
@@ -510,7 +655,7 @@
             });
 
             // Aktualizacja tekstów
-            const texts = ['appTitle', 'goal', 'addTitle', 'addDesc', 'subTitle', 'subDesc', 'algTitle', 'algDesc', 'seqTitle', 'seqDesc', 'chainTitle', 'chainDesc', 'certBtn', 'missionComplete', 'yourScore', 'coinsEarned', 'backToBase', 'certCreator', 'certInfo', 'cadetName', 'commanderName', 'certData', 'currentRank', 'solvedTasks', 'printBtn', 'printTip', 'great', 'correctWas', 'comboBroken', 'resetConfirmTitle', 'resetConfirmDesc', 'resetYes', 'resetNo', 'selectPilot', 'author', 'certWord', 'certSub', 'receives', 'achievedRank', 'solvedCorrectly', 'missionDate', 'congrats', 'commander'];
+            const texts = ['appTitle', 'goal', 'addTitle', 'addDesc', 'subTitle', 'subDesc', 'multTitle', 'multDesc', 'divTitle', 'divDesc', 'algTitle', 'algDesc', 'seqTitle', 'seqDesc', 'chainTitle', 'chainDesc', 'certBtn', 'missionComplete', 'yourScore', 'coinsEarned', 'backToBase', 'certCreator', 'certInfo', 'cadetName', 'commanderName', 'certData', 'currentRank', 'solvedTasks', 'printBtn', 'printTip', 'great', 'correctWas', 'comboBroken', 'resetConfirmTitle', 'resetConfirmDesc', 'resetYes', 'resetNo', 'selectPilot', 'author', 'certWord', 'certSub', 'receives', 'achievedRank', 'solvedCorrectly', 'missionDate', 'congrats', 'commander', 'helpersToggle', 'tutHeaderBtn', 'tutTitle', 'tutP1', 'tutL1', 'tutL2', 'tutL3', 'tutL4', 'tutBtn'];
             texts.forEach(key => {
                 if (el(`t-${key}`)) el(`t-${key}`).innerText = t[key];
                 if (el(`p-${key}`)) el(`p-${key}`).innerText = t[key];
@@ -540,14 +685,14 @@
                 }
             }
             activeIdx = idx;
-            localStorage.setItem('spaceMath_v3_activeIdx', activeIdx);
+            localStorage.setItem('spaceMath_v4_activeIdx', activeIdx);
             saveUsers();
             showScreen('menu-screen');
         }
 
         function addNewPilot() {
             if (users.length >= 8) return;
-            users.push({ name: '', coins: 0, sAdd: 0, sSub: 0, sAlg: 0, sSeq: 0, sChain: 0 });
+            users.push({ name: '', coins: 0, sAdd: 0, sSub: 0, sMult: 0, sDiv: 0, sAlg: 0, sSeq: 0, sChain: 0 });
             saveUsers();
             renderProfileList();
         }
@@ -616,12 +761,12 @@
         function resetProgress() {
             if (resetTarget === 'current') {
                 if(activeIdx === -1) return;
-                users[activeIdx] = { name: users[activeIdx].name, coins: 0, sAdd: 0, sSub: 0, sAlg: 0, sSeq: 0, sChain: 0 };
+                users[activeIdx] = { name: users[activeIdx].name, coins: 0, sAdd: 0, sSub: 0, sMult: 0, sDiv: 0, sAlg: 0, sSeq: 0, sChain: 0 };
                 saveUsers(); 
                 updateMenuUI();
             } else if (typeof resetTarget === 'number') {
                 users.splice(resetTarget, 1);
-                if (users.length === 0) users = [{ name: '', coins: 0, sAdd: 0, sSub: 0, sAlg: 0, sSeq: 0, sChain: 0 }];
+                if (users.length === 0) users = [{ name: '', coins: 0, sAdd: 0, sSub: 0, sMult: 0, sDiv: 0, sAlg: 0, sSeq: 0, sChain: 0 }];
                 activeIdx = -1; 
                 saveUsers(); 
                 renderProfileList();
@@ -638,7 +783,9 @@
         function updateMenuUI() {
             if (activeIdx === -1) return;
             const u = users[activeIdx];
-            // Upewnij się, że nowe zmienne (jak sChain) istnieją u starych graczy
+            
+            u.sMult = u.sMult || 0; 
+            u.sDiv = u.sDiv || 0; 
             u.sChain = u.sChain || 0; 
             
             const t = TRANSLATIONS_DATA[lang]; 
@@ -677,6 +824,8 @@
         function prepareCertificate() {
             if (activeIdx === -1) return;
             const u = users[activeIdx];
+            u.sMult = u.sMult || 0;
+            u.sDiv = u.sDiv || 0;
             u.sChain = u.sChain || 0;
             const t = TRANSLATIONS_DATA[lang];
             const rankInfo = getRankInfo(u.coins, t);
@@ -686,11 +835,15 @@
                 el('cert-rank-display').innerText = rankInfo.title;
                 el('cert-rank-display').className = `font-bold ${rankInfo.color}`;
             }
-            if(el('cert-solved-display')) el('cert-solved-display').innerText = (u.sAdd + u.sSub + u.sAlg + u.sSeq + u.sChain);
+            const totalSolved = (u.sAdd + u.sSub + u.sMult + u.sDiv + u.sAlg + u.sSeq + u.sChain);
+            if(el('cert-solved-display')) el('cert-solved-display').innerText = totalSolved;
+            
             if(el('cert-breakdown')) {
                 el('cert-breakdown').innerHTML = `
                     <div class="text-xs text-slate-300">${t.catAdd}: <span class="text-yellow-400 font-bold">${u.sAdd}</span></div>
                     <div class="text-xs text-slate-300">${t.catSub}: <span class="text-yellow-400 font-bold">${u.sSub}</span></div>
+                    <div class="text-xs text-slate-300">${t.catMult}: <span class="text-yellow-400 font-bold">${u.sMult}</span></div>
+                    <div class="text-xs text-slate-300">${t.catDiv}: <span class="text-yellow-400 font-bold">${u.sDiv}</span></div>
                     <div class="text-xs text-slate-300">${t.catAlg}: <span class="text-yellow-400 font-bold">${u.sAlg}</span></div>
                     <div class="text-xs text-slate-300">${t.catSeq}: <span class="text-yellow-400 font-bold">${u.sSeq}</span></div>
                     <div class="text-xs text-slate-300">${t.catChain}: <span class="text-yellow-400 font-bold">${u.sChain}</span></div>
@@ -702,6 +855,8 @@
         function handlePrint() {
             if(activeIdx === -1) return;
             const u = users[activeIdx];
+            u.sMult = u.sMult || 0;
+            u.sDiv = u.sDiv || 0;
             u.sChain = u.sChain || 0;
             const t = TRANSLATIONS_DATA[lang];
             const rank = getRankInfo(u.coins, t);
@@ -717,13 +872,16 @@
                 el('p-breakdown').innerHTML = `
                     <div>${t.catAdd}: ${u.sAdd}</div>
                     <div>${t.catSub}: ${u.sSub}</div>
+                    <div>${t.catMult}: ${u.sMult}</div>
+                    <div>${t.catDiv}: ${u.sDiv}</div>
                     <div>${t.catAlg}: ${u.sAlg}</div>
                     <div>${t.catSeq}: ${u.sSeq}</div>
                     <div>${t.catChain}: ${u.sChain}</div>
                 `;
             }
             if(el('p-rank')) el('p-rank').innerText = rank.title; 
-            if(el('p-solved')) el('p-solved').innerText = (u.sAdd + u.sSub + u.sAlg + u.sSeq + u.sChain);
+            const totalSolved = (u.sAdd + u.sSub + u.sMult + u.sDiv + u.sAlg + u.sSeq + u.sChain);
+            if(el('p-solved')) el('p-solved').innerText = totalSolved;
             
             el('diploma-print-area').style.display = 'block'; 
             window.print(); 
@@ -749,6 +907,7 @@
             screens.forEach(id => { const element = el(id); if (element) element.classList.add('hidden'); });
             const target = el(screenId);
             if (target) target.classList.remove('hidden');
+            
             if (screenId !== 'game-screen') renderStars(0);
             if (screenId === 'menu-screen') updateMenuUI();
             if (screenId === 'profile-screen') renderProfileList();
@@ -772,6 +931,86 @@
             return { type: 'column', a, b, operator: '-', answer: a - b, explanation: t.expSub, hints: hintsArr };
         }
 
+        function generateMultiplication(t, diff) {
+            if (diff < 3) {
+                let minA = 10, maxA = 20, minB = 2, maxB = 5; 
+                if(diff === 2) { minA = 20; maxA = 99; minB = 2; maxB = 9; } 
+                
+                const a = Math.floor(Math.random() * (maxA - minA + 1)) + minA;
+                const b = Math.floor(Math.random() * (maxB - minB + 1)) + minB;
+                const ans = a * b;
+
+                let strA = a.toString();
+                let cols = ans.toString().length;
+                let hintsArr = Array(cols).fill(' ');
+
+                let carry = 0;
+                let aIdx = strA.length - 1;
+                let ansIdx = cols - 1;
+
+                while (aIdx >= 0) {
+                    let prod = parseInt(strA[aIdx]) * b + carry;
+                    carry = Math.floor(prod / 10);
+                    if (carry > 0 && ansIdx > 0) {
+                        hintsArr[ansIdx - 1] = carry.toString();
+                    }
+                    aIdx--;
+                    ansIdx--;
+                }
+
+                return { type: 'column', a, b, operator: '×', answer: ans, explanation: t.expMult, hints: hintsArr };
+            } else {
+                let minA = 100, maxA = 999, minB = 11, maxB = 99;
+                let b = Math.floor(Math.random() * (maxB - minB + 1)) + minB;
+                while (b % 10 === 0) {
+                    b = Math.floor(Math.random() * (maxB - minB + 1)) + minB;
+                }
+                const a = Math.floor(Math.random() * (maxA - minA + 1)) + minA;
+                const ans = a * b;
+
+                const strB = b.toString();
+                const pp1 = a * parseInt(strB[1]);
+                const pp2 = a * parseInt(strB[0]);
+
+                return { 
+                    type: 'long_mult', 
+                    a: a, 
+                    b: b, 
+                    pp1: pp1, 
+                    pp2: pp2, 
+                    operator: '×', 
+                    answer: ans, 
+                    explanation: t.expLongMult || t.expMult 
+                };
+            }
+        }
+
+        function generateDivision(t, diff) {
+            let minA = 2, maxA = 5, minB = 11, maxB = 50;
+            if(diff === 2) { minA = 2; maxA = 9; minB = 51; maxB = 200; }
+            else if(diff === 3) { minA = 3; maxA = 9; minB = 201; maxB = 999; }
+            
+            const divisor = Math.floor(Math.random() * (maxA - minA + 1)) + minA;
+            const ans = Math.floor(Math.random() * (maxB - minB + 1)) + minB;
+            const dividend = divisor * ans;
+            
+            let strDiv = dividend.toString();
+            let rems = Array(strDiv.length).fill('');
+            let rem = 0;
+            let qStarted = false;
+            for (let i = 0; i < strDiv.length; i++) {
+                let currentVal = rem * 10 + parseInt(strDiv[i]);
+                let q = Math.floor(currentVal / divisor);
+                rem = currentVal % divisor;
+                if (q > 0) qStarted = true;
+                if (i < strDiv.length - 1 && qStarted && rem > 0) {
+                    rems[i+1] = rem.toString();
+                }
+            }
+            
+            return { type: 'short_division', dividend: dividend, divisor: divisor, answer: ans, explanation: t.expDiv, rems: rems };
+        }
+
         function generateAlgebra(t, diff) {
             const types = ['x+a=b', 'a+x=b', 'x-a=b'], type = types[Math.floor(Math.random() * types.length)];
             let min = 2, max = 10; if(diff === 2) { min = 5; max = 25; } else if(diff === 3) { min = 15; max = 80; }
@@ -791,25 +1030,41 @@
         }
 
         function generateChain(t, diff) {
-            let qText = '', answer = 0;
+            let qText = '', answer = 0, hintText = '';
             if (diff === 1) {
                 const a = Math.floor(Math.random() * 10) + 5; const b = Math.floor(Math.random() * 10) + 1; const c = Math.floor(Math.random() * (a + b - 1)) + 1;
-                answer = a + b - c; qText = `${a} + ${b} - ${c} = ?`;
+                answer = a + b - c; 
+                qText = `${a} + ${b} - ${c} = ?`; 
+                hintText = `${a + b} - ${c} = ?`;
             } else if (diff === 2) {
                 const a = Math.floor(Math.random() * 8) + 2; const b = Math.floor(Math.random() * 8) + 2; const isPlus = Math.random() > 0.5;
-                if (isPlus) { const c = Math.floor(Math.random() * 20) + 1; answer = (a * b) + c; qText = `${a} × ${b} + ${c} = ?`; } 
-                else { const c = Math.floor(Math.random() * (a * b - 1)) + 1; answer = (a * b) - c; qText = `${a} × ${b} - ${c} = ?`; }
+                if (isPlus) { 
+                    const c = Math.floor(Math.random() * 20) + 1; 
+                    answer = (a * b) + c; 
+                    qText = `${a} × ${b} + ${c} = ?`; 
+                    hintText = `${a * b} + ${c} = ?`; 
+                } 
+                else { 
+                    const c = Math.floor(Math.random() * (a * b - 1)) + 1; 
+                    answer = (a * b) - c; 
+                    qText = `${a} × ${b} - ${c} = ?`; 
+                    hintText = `${a * b} - ${c} = ?`; 
+                }
             } else {
                 const type = Math.random() > 0.5 ? 'mult2' : 'mixed';
                 if (type === 'mult2') {
                     const a = Math.floor(Math.random() * 6) + 3; const b = Math.floor(Math.random() * 6) + 3; const c = Math.floor(Math.random() * 6) + 3; const d = Math.floor(Math.random() * 6) + 3;
-                    answer = (a * b) + (c * d); qText = `${a} × ${b} + ${c} × ${d} = ?`;
+                    answer = (a * b) + (c * d); 
+                    qText = `${a} × ${b} + ${c} × ${d} = ?`; 
+                    hintText = `${a * b} + ${c * d} = ?`;
                 } else {
                     const a = Math.floor(Math.random() * 10) + 5; const b = Math.floor(Math.random() * 10) + 5; const c = Math.floor(Math.random() * 30) + 10;
-                    answer = (a * b) - c; qText = `${a} × ${b} - ${c} = ?`;
+                    answer = (a * b) - c; 
+                    qText = `${a} × ${b} - ${c} = ?`; 
+                    hintText = `${a * b} - ${c} = ?`;
                 }
             }
-            return { type: 'inline', questionText: qText, answer: answer, explanation: t.expChain };
+            return { type: 'inline', questionText: qText, answer: answer, explanation: t.expChain, hintText: hintText };
         }
 
         // --- SILNIK GRY ---
@@ -824,6 +1079,8 @@
             const t = TRANSLATIONS_DATA[lang]; 
             if (mode === 'add') currentQuestion = generateAddition(t, currentDifficulty); 
             else if (mode === 'sub') currentQuestion = generateSubtraction(t, currentDifficulty); 
+            else if (mode === 'mult') currentQuestion = generateMultiplication(t, currentDifficulty); 
+            else if (mode === 'div') currentQuestion = generateDivision(t, currentDifficulty); 
             else if (mode === 'algebra') currentQuestion = generateAlgebra(t, currentDifficulty); 
             else if (mode === 'sequence') currentQuestion = generateSequence(t, currentDifficulty); 
             else if (mode === 'chain') currentQuestion = generateChain(t, currentDifficulty); 
@@ -838,6 +1095,20 @@
             if (el('game-session-coins')) el('game-session-coins').innerText = sessionCoins; 
             if (el('game-progress-bar')) el('game-progress-bar').style.width = `${(questionCount / maxQuestions) * 100}%`;
             
+            // Aktualizacja ikony oka
+            if (el('helpers-icon')) {
+                el('helpers-icon').setAttribute('data-lucide', showVisualHelpers ? 'eye' : 'eye-off');
+            }
+
+            // Aktualizacja widoczności przycisku instrukcji
+            if (el('tutorial-btn')) {
+                if (gameMode === 'div') {
+                    el('tutorial-btn').classList.remove('hidden');
+                } else {
+                    el('tutorial-btn').classList.add('hidden');
+                }
+            }
+
             if (combo >= 2) { 
                 if (el('combo-container')) el('combo-container').classList.remove('hidden'); 
                 if (el('combo-value')) el('combo-value').innerText = combo; 
@@ -845,7 +1116,7 @@
                 if (el('combo-container')) el('combo-container').classList.add('hidden'); 
             }
 
-            // Obsługa podpowiedzi X
+            // Obsługa podpowiedzi
             if (el('feedback-correct')) {
                 if (feedback === 'correct') {
                     el('feedback-correct').classList.remove('hidden');
@@ -881,11 +1152,18 @@
                 const padA = strA.padStart(cols, ' ').split(''), padB = strB.padStart(cols, ' ').split(''), padUser = userAnswer.padStart(cols, ' ').split(''), padHints = Array(cols).fill(' ');
                 if (currentQuestion.hints) { let diff = cols - hLen; for(let i=0; i<hLen; i++) padHints[i + diff] = currentQuestion.hints[i]; }
                 
-                const hintColor = currentQuestion.operator === '+' ? 'text-emerald-400' : 'text-fuchsia-400';
+                let hintColor = 'text-amber-400';
+                if (currentQuestion.operator === '+') hintColor = 'text-emerald-400';
+                else if (currentQuestion.operator === '-') hintColor = 'text-fuchsia-400';
                 
-                let arrowHtml = Array(cols).fill(' ').map((_, i) => i === cols - 1 ? `<div class="w-8 sm:w-12 md:w-16 flex justify-center ${userAnswer.length === 0 ? 'text-yellow-400 animate-bounce opacity-100' : 'opacity-0'}"><i data-lucide="arrow-down" class="w-6 h-6 border-2 border-yellow-400 rounded-full p-0.5 bg-yellow-400/20"></i></div>` : `<div class="w-8 sm:w-12 md:w-16"></div>`).join('');
-                let hintsHtml = padHints.map(h => `<div class="w-8 sm:w-12 md:w-16 text-center text-xl sm:text-2xl md:text-3xl font-bold">${h.replace(' ', '&nbsp;')}</div>`).join('');
-                let aHtml = padA.map((d, i) => `<div class="w-8 sm:w-12 md:w-16 text-center drop-shadow-[0_0_5px_rgba(255,255,255,0.3)] ${(padHints[i] !== ' ' && currentQuestion.operator === '-') ? 'line-through text-slate-500 opacity-80 decoration-fuchsia-500 decoration-2' : ''}">${d.replace(' ', '&nbsp;')}</div>`).join('');
+                const targetCol = cols - 1 - userAnswer.length;
+                let arrowHtml = Array(cols).fill(' ').map((_, i) => {
+                    const isTarget = (showVisualHelpers && i === targetCol && !feedback);
+                    return `<div class="w-8 sm:w-12 md:w-16 flex justify-center ${isTarget ? 'text-yellow-400 animate-bounce opacity-100' : 'opacity-0'}"><i data-lucide="arrow-down" class="w-6 h-6 border-2 border-yellow-400 rounded-full p-0.5 bg-yellow-400/20"></i></div>`;
+                }).join('');
+
+                let hintsHtml = padHints.map(h => `<div class="w-8 sm:w-12 md:w-16 text-center text-xl sm:text-2xl md:text-3xl font-bold">${showVisualHelpers ? h.replace(' ', '&nbsp;') : '&nbsp;'}</div>`).join('');
+                let aHtml = padA.map((d, i) => `<div class="w-8 sm:w-12 md:w-16 text-center drop-shadow-[0_0_5px_rgba(255,255,255,0.3)] ${(showVisualHelpers && padHints[i] !== ' ' && currentQuestion.operator === '-') ? 'line-through text-slate-500 opacity-80 decoration-fuchsia-500 decoration-2' : ''}">${d.replace(' ', '&nbsp;')}</div>`).join('');
                 let bHtml = padB.map(d => `<div class="w-8 sm:w-12 md:w-16 text-center drop-shadow-[0_0_5px_rgba(255,255,255,0.3)]">${d.replace(' ', '&nbsp;')}</div>`).join('');
                 
                 let uHtml = '';
@@ -895,17 +1173,172 @@
                     uHtml = padUser.map(d => `<div class="w-8 sm:w-12 md:w-16 text-center">${d.replace(' ', '&nbsp;')}</div>`).join('');
                 }
 
+                let hHtml = ''; 
+                if (currentQuestion.hintText) {
+                    if (isHintVisible || feedback !== null) {
+                        hHtml = `<div class="mt-6 md:mt-8 min-h-[48px] flex items-center justify-center w-full"><div class="text-emerald-400 text-2xl sm:text-3xl font-bold tracking-widest opacity-90 drop-shadow-[0_0_8px_rgba(52,211,153,0.6)] font-sans">${currentQuestion.hintText}</div></div>`;
+                    } else {
+                        hHtml = `<div class="mt-6 md:mt-8 min-h-[48px] flex items-center justify-center w-full"><button onclick="revealHint()" class="flex items-center gap-2 px-5 py-2.5 bg-emerald-900/40 hover:bg-emerald-800/60 text-emerald-400 border border-emerald-500/50 rounded-full text-sm sm:text-base font-bold transition-all shadow-[0_0_10px_rgba(16,185,129,0.2)] active:scale-95 font-sans"><i data-lucide="lightbulb" class="w-5 h-5"></i> <span>${t.showHint}</span></button></div>`;
+                    }
+                }
+
                 html = `
-                    <div class="inline-flex flex-col items-end font-mono text-5xl sm:text-6xl md:text-7xl font-bold text-white leading-none transition-opacity duration-300 ${opacityClass}">
-                        <div class="flex pr-2 -mb-2 h-8 sm:h-10 w-full justify-end translate-y-3 relative z-20">${arrowHtml}</div>
-                        <div class="flex mb-1 h-6 sm:h-8 opacity-90 pr-2 ${hintColor} w-full justify-end">${hintsHtml}</div>
-                        <div class="flex mb-1.5 pr-2 w-full justify-end">${aHtml}</div>
-                        <div class="flex items-end mb-1.5 w-full justify-between">
-                            <span class="text-4xl sm:text-5xl md:text-6xl text-indigo-400 pb-1">${currentQuestion.operator}</span>
-                            <div class="flex pr-2">${bHtml}</div>
-                        </div>
-                        <div class="border-b-4 sm:border-b-8 border-indigo-500/70 my-1.5 md:my-3 w-full rounded-full shrink-0 shadow-[0_2px_10px_rgba(99,102,241,0.5)]"></div>
+                    <div class="flex flex-col items-center justify-center w-full">
+                        <div class="inline-flex flex-col items-end font-mono text-5xl sm:text-6xl md:text-7xl font-bold text-white leading-none transition-opacity duration-300 ${opacityClass}">
+                            <div class="flex pr-2 -mb-2 h-8 sm:h-10 w-full justify-end translate-y-3 relative z-20">${arrowHtml}</div>
+                            <div class="flex mb-1 h-6 sm:h-8 opacity-90 pr-2 ${hintColor} w-full justify-end">${hintsHtml}</div>
+                            <div class="flex mb-1.5 pr-2 w-full justify-end">${aHtml}</div>
+                            <div class="flex items-end mb-1.5 w-full justify-between">
+                                <span class="text-4xl sm:text-5xl md:text-6xl text-indigo-400 pb-1">${currentQuestion.operator}</span>
+                                <div class="flex pr-2">${bHtml}</div>
+                            </div>
+                            <div class="border-b-4 sm:border-b-8 border-indigo-500/70 my-1.5 md:my-3 w-full rounded-full shrink-0 shadow-[0_2px_10px_rgba(99,102,241,0.5)]"></div>
                         <div class="flex pr-2 min-h-[1em] mt-1.5 md:mt-3 text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.5)] ${pulseClass}">${uHtml}</div>
+                    </div>
+                `;
+            } else if (currentQuestion.type === 'long_mult') {
+                const strA = currentQuestion.a.toString();
+                const strB = currentQuestion.b.toString();
+                const strAns = currentQuestion.answer.toString();
+                const pp1 = currentQuestion.pp1.toString();
+                const pp2 = currentQuestion.pp2.toString();
+
+                const cols = strAns.length;
+                let padUser = userAnswer;
+                if (feedback && userAnswer === '') padUser = strAns;
+                const padUserArr = padUser.padStart(cols, ' ').split('');
+
+                const targetCol = cols - 1 - userAnswer.length;
+                let arrowHtml = Array(cols).fill(' ').map((_, i) => {
+                    const isTarget = (showVisualHelpers && i === targetCol && !feedback);
+                    return `<div class="w-8 sm:w-12 md:w-16 flex justify-center ${isTarget ? 'text-yellow-400 animate-bounce opacity-100' : 'opacity-0'}"><i data-lucide="arrow-down" class="w-6 h-6 border-2 border-yellow-400 rounded-full p-0.5 bg-yellow-400/20"></i></div>`;
+                }).join('');
+
+                const aHtml = strA.padStart(cols, ' ').split('').map(d => `<div class="w-8 sm:w-12 md:w-16 text-center drop-shadow-[0_0_5px_rgba(255,255,255,0.3)]">${d.replace(' ', '&nbsp;')}</div>`).join('');
+                const bHtml = strB.padStart(cols, ' ').split('').map(d => `<div class="w-8 sm:w-12 md:w-16 text-center drop-shadow-[0_0_5px_rgba(255,255,255,0.3)]">${d.replace(' ', '&nbsp;')}</div>`).join('');
+
+                let uHtml = padUserArr.map(d => `<div class="w-8 sm:w-12 md:w-16 text-center">${d.replace(' ', '&nbsp;')}</div>`).join('');
+
+                let ppHtml = '';
+                if (showVisualHelpers && (isHintVisible || feedback !== null)) {
+                    const p1H = pp1.padStart(cols, ' ').split('').map(d => `<div class="w-8 sm:w-12 md:w-16 text-center text-slate-300">${d.replace(' ', '&nbsp;')}</div>`).join('');
+                    const p2H = (pp2 + ' ').padStart(cols, ' ').split('').map(d => `<div class="w-8 sm:w-12 md:w-16 text-center text-slate-300">${d.replace(' ', '&nbsp;')}</div>`).join('');
+
+                    ppHtml = `
+                        <div class="flex pr-2 w-full justify-end mb-1">${p1H}</div>
+                        <div class="flex items-end mb-1.5 w-full justify-between">
+                            <span class="text-3xl sm:text-4xl text-emerald-400 pb-1">+</span>
+                            <div class="flex pr-2">${p2H}</div>
+                        </div>
+                        <div class="border-b-4 sm:border-b-8 border-emerald-500/70 my-1.5 md:my-3 w-full rounded-full shrink-0 shadow-[0_2px_10px_rgba(16,185,129,0.5)]"></div>
+                    `;
+                }
+
+                let hHtml = '';
+                if (!isHintVisible && feedback === null) {
+                    hHtml = `<div class="mt-6 md:mt-8 min-h-[48px] flex items-center justify-center w-full"><button onclick="revealHint()" class="flex items-center gap-2 px-5 py-2.5 bg-emerald-900/40 hover:bg-emerald-800/60 text-emerald-400 border border-emerald-500/50 rounded-full text-sm sm:text-base font-bold transition-all shadow-[0_0_10px_rgba(16,185,129,0.2)] active:scale-95 font-sans"><i data-lucide="lightbulb" class="w-5 h-5"></i> <span>${t.showHint}</span></button></div>`;
+                } else if (isHintVisible || feedback !== null) {
+                    // Etapowa instrukcja tekstowa dla mnożenia wielocyfrowego
+                    let stepText = t.longStep1;
+                    if (userAnswer.length > pp1.length) stepText = t.longStep2;
+                    if (feedback !== null) stepText = t.longStepSum;
+
+                    hHtml = `<div class="mt-4 md:mt-6 flex flex-col items-center gap-3 w-full">
+                                <div class="bg-indigo-900/40 border border-indigo-500/30 p-3 rounded-xl text-center">
+                                    <p class="text-indigo-200 text-xs sm:text-sm font-medium mb-2">${stepText}</p>
+                                    <div class="flex gap-4 justify-center font-mono text-xs sm:text-base text-cyan-300">
+                                        <div class="bg-black/30 px-2 py-1 rounded border border-cyan-500/20">${currentQuestion.a} × ${strB[1]} = ${pp1}</div>
+                                        <div class="bg-black/30 px-2 py-1 rounded border border-cyan-500/20">${currentQuestion.a} × ${strB[0]}0 = ${pp2}0</div>
+                                    </div>
+                                </div>
+                             </div>`;
+                }
+
+                html = `
+                    <div class="flex flex-col items-center justify-center w-full">
+                        <div class="inline-flex flex-col items-end font-mono text-5xl sm:text-6xl md:text-7xl font-bold text-white leading-none transition-opacity duration-300 ${opacityClass}">
+                            <div class="flex pr-2 -mb-2 h-8 sm:h-10 w-full justify-end translate-y-3 relative z-20">${arrowHtml}</div>
+                            <div class="flex mb-1.5 pr-2 w-full justify-end mt-2">${aHtml}</div>
+                            <div class="flex items-end mb-1.5 w-full justify-between">
+                                <span class="text-4xl sm:text-5xl md:text-6xl text-amber-400 pb-1">×</span>
+                                <div class="flex pr-2">${bHtml}</div>
+                            </div>
+                            <div class="border-b-4 sm:border-b-8 border-amber-500/70 my-1.5 md:my-3 w-full rounded-full shrink-0 shadow-[0_2px_10px_rgba(251,191,36,0.5)]"></div>
+                            
+                            ${ppHtml}
+
+                            <div class="flex pr-2 min-h-[1em] mt-1.5 md:mt-3 text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.5)] ${pulseClass}">${uHtml}</div>
+                        </div>
+                        ${hHtml}
+                    </div>
+                `;
+            } else if (currentQuestion.type === 'short_division') {
+                const strDividend = currentQuestion.dividend.toString();
+                const strDivisor = currentQuestion.divisor.toString();
+                const strAns = currentQuestion.answer.toString();
+                const rems = currentQuestion.rems;
+
+                let padUser = userAnswer;
+                if (feedback && userAnswer === '') padUser = strAns;
+
+                let topRow = Array(strDividend.length).fill('');
+                let startIdx = strDividend.length - strAns.length;
+                for (let i = 0; i < padUser.length; i++) {
+                    topRow[startIdx + i] = padUser[i];
+                }
+                
+                let uHtml = topRow.map((d, i) => {
+                    if (d === '') {
+                        if (showVisualHelpers && !feedback && padUser.length < strAns.length && i === startIdx + padUser.length) {
+                            return `<div class="w-8 sm:w-12 md:w-16 flex justify-center items-end pb-1"><div class="w-6 sm:w-8 border-b-4 sm:border-b-8 border-cyan-400/80 animate-pulse h-2"></div></div>`;
+                        }
+                        return `<div class="w-8 sm:w-12 md:w-16"></div>`;
+                    }
+                    return `<div class="w-8 sm:w-12 md:w-16 text-center">${d}</div>`;
+                }).join('');
+
+                let divHtml = strDividend.split('').map((d, i) => {
+                    let remHtml = (showVisualHelpers && isHintVisible && rems[i] !== '') ? `<span class="absolute -left-2 sm:-left-3 top-0 sm:-top-1 text-violet-400 text-lg sm:text-xl font-bold drop-shadow-[0_0_5px_rgba(139,92,246,0.8)]">${rems[i]}</span>` : '';
+                    return `<div class="relative w-8 sm:w-12 md:w-16 text-center text-white drop-shadow-[0_0_5px_rgba(255,255,255,0.3)]">${remHtml}${d}</div>`;
+                }).join('');
+
+                let hHtml = ''; 
+                if (!isHintVisible && feedback === null) {
+                    hHtml = `<div class="mt-8 md:mt-12 min-h-[48px] flex items-center justify-center w-full"><button onclick="revealHint()" class="flex items-center gap-2 px-5 py-2.5 bg-violet-900/40 hover:bg-violet-800/60 text-violet-400 border border-violet-500/50 rounded-full text-sm sm:text-base font-bold transition-all shadow-[0_0_10px_rgba(139,92,246,0.2)] active:scale-95 font-sans"><i data-lucide="lightbulb" class="w-5 h-5"></i> <span>${t.showHint}</span></button></div>`;
+                }
+
+                let multiples = '';
+                if (isHintVisible || feedback !== null) {
+                    multiples = `<div class="mt-6 flex flex-col items-center w-full">
+                                    <div class="text-xs text-violet-300/70 mb-2 uppercase tracking-widest text-center">${t.multiplesHint || 'Ściąga (Wielokrotności)'}</div>
+                                    <div class="text-violet-300 font-mono text-sm sm:text-base grid grid-cols-5 gap-x-3 sm:gap-x-6 gap-y-2 bg-slate-800/80 p-4 rounded-xl border border-violet-500/30">`;
+                    for (let i = 1; i <= 9; i++) {
+                        multiples += `<div class="text-center">${currentQuestion.divisor}×${i}=<span class="text-white font-bold">${currentQuestion.divisor * i}</span></div>`;
+                    }
+                    multiples += `</div></div>`;
+                }
+
+                html = `
+                    <div class="flex flex-col items-center justify-center w-full transition-opacity duration-300 ${opacityClass}">
+                        <div class="flex items-end font-mono text-5xl sm:text-6xl md:text-7xl font-bold leading-none">
+                            
+                            <!-- Lewa strona (Wynik, Kreska, Dzielna) -->
+                            <div class="flex flex-col items-end">
+                                <div class="flex items-end min-h-[1em] text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.5)] mb-2">
+                                    ${uHtml}
+                                </div>
+                                <div class="border-t-4 sm:border-t-8 border-violet-500 w-full rounded-full shadow-[0_2px_10px_rgba(139,92,246,0.8)] mb-2 md:mb-4"></div>
+                                <div class="flex">${divHtml}</div>
+                            </div>
+
+                            <!-- Prawa strona (: Dzielnik) -->
+                            <div class="flex items-center mb-0 ml-2 sm:ml-4">
+                                <div class="text-violet-400 mr-2 sm:mr-4 drop-shadow-[0_0_5px_rgba(139,92,246,0.8)] pb-1 sm:pb-2">:</div>
+                                <div class="text-white drop-shadow-[0_0_5px_rgba(255,255,255,0.3)]">${strDivisor}</div>
+                            </div>
+
+                        </div>
+                        ${isHintVisible || feedback !== null ? multiples : hHtml}
                     </div>
                 `;
             } else {
@@ -935,9 +1368,13 @@
 
         function handleNumpad(num) { 
             if (feedback) return; 
-            if (userAnswer.length < 4) { 
-                if (currentQuestion && currentQuestion.type === 'column') {
-                    userAnswer = num.toString() + userAnswer; 
+            if (userAnswer.length < 6) { 
+                if (currentQuestion && (currentQuestion.type === 'column' || currentQuestion.type === 'short_division' || currentQuestion.type === 'long_mult')) {
+                    if (currentQuestion.type === 'short_division') {
+                        userAnswer += num.toString();
+                    } else {
+                        userAnswer = num.toString() + userAnswer; 
+                    }
                 } else {
                     userAnswer += num.toString(); 
                 }
@@ -948,7 +1385,7 @@
         function handleBackspace() { 
             if (feedback) return; 
             if (userAnswer.length > 0) { 
-                if (currentQuestion && currentQuestion.type === 'column') {
+                if (currentQuestion && (currentQuestion.type === 'column' || currentQuestion.type === 'long_mult')) {
                     userAnswer = userAnswer.slice(1); 
                 } else {
                     userAnswer = userAnswer.slice(0, -1); 
@@ -972,9 +1409,13 @@
                 users[activeIdx].coins += earnedJustNow;
                 
                 users[activeIdx].sChain = users[activeIdx].sChain || 0; // fallback
+                users[activeIdx].sMult = users[activeIdx].sMult || 0; // fallback
+                users[activeIdx].sDiv = users[activeIdx].sDiv || 0; // fallback
 
                 if (gameMode === 'add') users[activeIdx].sAdd += 1; 
                 else if (gameMode === 'sub') users[activeIdx].sSub += 1; 
+                else if (gameMode === 'mult') users[activeIdx].sMult += 1; 
+                else if (gameMode === 'div') users[activeIdx].sDiv += 1; 
                 else if (gameMode === 'algebra') users[activeIdx].sAlg += 1; 
                 else if (gameMode === 'sequence') users[activeIdx].sSeq += 1;
                 else if (gameMode === 'chain') users[activeIdx].sChain += 1;

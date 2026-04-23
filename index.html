@@ -685,7 +685,7 @@
                 }
             }
             activeIdx = idx;
-            localStorage.setItem('spaceMath_v4_activeIdx', activeIdx);
+            localStorage.setItem('spaceMath_v5_activeIdx', activeIdx);
             saveUsers();
             showScreen('menu-screen');
         }
@@ -768,6 +768,7 @@
                 users.splice(resetTarget, 1);
                 if (users.length === 0) users = [{ name: '', coins: 0, sAdd: 0, sSub: 0, sMult: 0, sDiv: 0, sAlg: 0, sSeq: 0, sChain: 0 }];
                 activeIdx = -1; 
+                localStorage.setItem('spaceMath_v5_activeIdx', activeIdx);
                 saveUsers(); 
                 renderProfileList();
             }
